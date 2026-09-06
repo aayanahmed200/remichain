@@ -9,12 +9,21 @@ requests_bp = Blueprint("requests", __name__)
 
 @requests_bp.route("/request", methods=["GET", "POST"])
 def request_supply():
+    facilities = Facility.query.order_by(Facility.name).all()
+
     if request.method == "POST":
+        try:
+            facility_id = int(request.form["facility_id"])
+            quantity_needed = int(request.form["quantity_needed"])
+        except (KeyError, ValueError):
+            flash("Please choose a facility and enter quantity needed as a whole number.", "error")
+            return render_template("request.html", facilities=facilities), 400
+
         need = SupplyRequest(
-            facility_id=int(request.form["facility_id"]),
+            facility_id=facility_id,
             item_name=request.form["item_name"].strip(),
             category=request.form["category"],
-            quantity_needed=int(request.form["quantity_needed"]),
+            quantity_needed=quantity_needed,
             unit=request.form.get("unit", "units"),
             urgency=request.form.get("urgency", "medium"),
             notes=request.form.get("notes", "").strip(),
@@ -33,5 +42,4 @@ def request_supply():
 
         return redirect(url_for("main.dashboard"))
 
-    facilities = Facility.query.order_by(Facility.name).all()
     return render_template("request.html", facilities=facilities)

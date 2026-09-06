@@ -109,6 +109,7 @@ body {
 }
 .badge-available, .badge-open, .badge-proposed { background: #dbeafe; color: #1e40af; }
 .badge-fulfilled, .badge-completed, .badge-delivered { background: #dcfce7; color: #166534; }
+.badge-reserved, .badge-partially_fulfilled { background: #fef9c3; color: #854d0e; }
 .badge-urgency-critical { background: #fee2e2; color: #991b1b; }
 .badge-urgency-high { background: #ffedd5; color: #9a3412; }
 .badge-urgency-medium { background: #fef9c3; color: #854d0e; }
@@ -119,5 +120,6 @@ body {
 .flash { padding: 0.8rem 1rem; border-radius: 8px; margin-bottom: 1rem; }
 .flash-success { background: #dcfce7; color: #166534; }
 .flash-info { background: #dbeafe; color: #1e40af; }
+.flash-error { background: #fee2e2; color: #991b1b; }
 
 footer { text-align: center; color: var(--muted); padding: 2rem; font-size: 0.85rem; }

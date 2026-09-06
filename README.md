@@ -12,7 +12,9 @@ Hospitals and clinics regularly end up with supplies they can't use in time — 
 
 ## How the matching works
 
-Facilities list surplus supplies as donations and log what they need as requests. A matching engine (`app/services/matching.py`) scores every possible donation-to-request pair using four factors: urgency, proximity, quantity match, and expiration proximity. Matches are proposed to requesters and can be accepted or declined.
+Facilities list surplus supplies as donations and log what they need as requests. A matching engine (`app/services/matching.py`) scores every possible donation-to-request pair using four factors: urgency, proximity, quantity match, and expiration proximity, then proposes the best available donation for each open request as a `Match` record (`status="proposed"`).
+
+Once a donation is matched it's marked `reserved` so it won't be proposed again; a request becomes `fulfilled` once a match covers its full need, or stays `partially_fulfilled` (still eligible for another pass) otherwise. This keeps `run_matching_pass` / `POST /api/run-matching` idempotent — calling it again without new donations or requests creates no duplicate matches. There is no accept/decline workflow yet; matches stay in the `proposed` state once created.
 
 ## Features
 

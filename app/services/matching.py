@@ -95,6 +95,16 @@ def find_matches_for_request(req: SupplyRequest, limit=5):
 
 
 def create_match(donation: SupplyDonation, req: SupplyRequest, score: float):
+    """Create a Match, then take the donation/request out of the matching pool.
+
+    Without this, `donation.status` and `req.status` would stay "available"
+    and "open"/"partially_fulfilled" forever, so a repeated matching pass
+    (re-triggered, or run on a schedule) would keep proposing the very same
+    pairing and pile up duplicate Match rows. Updating the statuses here —
+    the single place every match is created, whether from run_matching_pass()
+    or the immediate on-submit match in routes/requests.py — is what makes
+    matching idempotent.
+    """
     matched_qty = min(donation.quantity, req.quantity_needed)
     match = Match(
         donation_id=donation.id,
@@ -104,12 +114,32 @@ def create_match(donation: SupplyDonation, req: SupplyRequest, score: float):
         status="proposed",
     )
     db.session.add(match)
+
+    # This donation is now spoken for — pull it out of the pool so it can't
+    # be proposed again on a later pass (find_matches_for_request only looks
+    # at status="available" donations).
+    donation.status = "reserved"
+
+    # A request is only done once a match covers its whole need. Otherwise it
+    # stays "partially_fulfilled", which run_matching_pass (and the dashboard
+    # stats) already treat as still open for matching, so a later pass can
+    # top it up from a different donation without re-touching this one.
+    req.status = "fulfilled" if matched_qty >= req.quantity_needed else "partially_fulfilled"
+
     db.session.commit()
     return match
 
 
 def run_matching_pass():
-    """Batch job: scan every open request and propose the best match, if any."""
+    """Batch job: scan every open request and propose the best match, if any.
+
+    Safe to call repeatedly (re-triggered by a user, retried, or run on a
+    schedule): requests are only selected here while still "open" or
+    "partially_fulfilled", donations are only offered by find_matches_for_request
+    while still "available", and create_match() moves both out of those pools
+    as soon as they're matched — so a second pass with no new donations or
+    requests in between creates zero additional matches instead of duplicates.
+    """
     created = []
     open_requests = SupplyRequest.query.filter(
         SupplyRequest.status.in_(["open", "partially_fulfilled"])

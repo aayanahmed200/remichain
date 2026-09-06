@@ -41,7 +41,7 @@ Facilities list surplus supplies as donations and log what they need as requests
 ## Setup
 
 ```bash
-git clone https://github.com/aayanahmed20/remichain.git
+git clone https://github.com/aayanahmed200/remichain.git
 cd remichain
 python -m venv .venv
 source .venv/bin/activate

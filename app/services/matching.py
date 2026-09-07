@@ -68,8 +68,8 @@ def score_pair(donation: SupplyDonation, req: SupplyRequest, cfg) -> float:
     """Weighted score for how good a donation-to-request match is. Higher is better."""
     if donation.item_name.strip().lower() != req.item_name.strip().lower():
         return -1.0  # not the same item at all
-    if (donation.expiry_date and donation.expiry_date <= date.today()) or req.quantity_needed <= 0:
-        return -1.0  # never match expired stock or malformed request (avoid ZeroDivisionError below)
+    if (donation.expiry_date and donation.expiry_date <= date.today()) or req.quantity_needed <= 0 or donation.quantity <= 0:
+        return -1.0  # never match expired, non-positive, or malformed stock/request (avoid ZeroDivisionError below)
 
     urgency = req.urgency_score / 4.0  # normalize 0-1
     expiry = _expiry_urgency(donation)
@@ -104,8 +104,45 @@ def create_match(donation: SupplyDonation, req: SupplyRequest, score: float):
     the single place every match is created, whether from run_matching_pass()
     or the immediate on-submit match in routes/requests.py — is what makes
     matching idempotent.
+
+    Returns the created Match, or None if a concurrent call already claimed
+    this donation first (see the atomic update below) — callers should treat
+    a None return as "no match created this time" rather than an error.
     """
     matched_qty = min(donation.quantity, req.quantity_needed)
+
+    # Atomic check-and-decrement, not a plain `donation.quantity -= matched_qty`
+    # in Python: this makes the claim race-safe. Two concurrent matching
+    # attempts against the same donation can both read the same pre-update
+    # quantity, but only one of these UPDATEs will find the row still
+    # `status="available"` with enough quantity left and actually apply —
+    # the loser gets 0 affected rows back and bails out below instead of
+    # silently over-committing stock that's already spoken for.
+    updated_rows = (
+        db.session.query(SupplyDonation)
+        .filter(
+            SupplyDonation.id == donation.id,
+            SupplyDonation.status == "available",
+            SupplyDonation.quantity >= matched_qty,
+        )
+        .update(
+            {SupplyDonation.quantity: SupplyDonation.quantity - matched_qty},
+            synchronize_session=False,
+        )
+    )
+    if not updated_rows:
+        db.session.rollback()
+        return None  # someone else already matched this donation first
+
+    db.session.refresh(donation)
+
+    # Only the remainder matters now: a partially-claimed donation stays
+    # "available" (with its reduced quantity) so the rest of it can still be
+    # matched against other requests; it's only pulled out of the pool once
+    # nothing is left.
+    if donation.quantity <= 0:
+        donation.status = "reserved"
+
     match = Match(
         donation_id=donation.id,
         request_id=req.id,
@@ -114,11 +151,6 @@ def create_match(donation: SupplyDonation, req: SupplyRequest, score: float):
         status="proposed",
     )
     db.session.add(match)
-
-    # This donation is now spoken for — pull it out of the pool so it can't
-    # be proposed again on a later pass (find_matches_for_request only looks
-    # at status="available" donations).
-    donation.status = "reserved"
 
     # A request is only done once a match covers its whole need. Otherwise it
     # stays "partially_fulfilled", which run_matching_pass (and the dashboard
@@ -149,6 +181,8 @@ def run_matching_pass():
         best = find_matches_for_request(req, limit=1)
         if best:
             donation, score = best[0]
-            created.append(create_match(donation, req, score))
+            match = create_match(donation, req, score)
+            if match:
+                created.append(match)
 
     return created

@@ -23,14 +23,22 @@ def donate():
         try:
             facility_id = int(request.form["facility_id"])
             quantity = int(request.form["quantity"])
+            item_name = request.form["item_name"].strip()
+            category = request.form["category"].strip()
+            if not item_name or not category or quantity < 1:
+                raise ValueError("missing or invalid field")
         except (KeyError, ValueError):
-            flash("Please choose a facility and enter quantity as a whole number.", "error")
+            flash("Please choose a facility, enter an item name and category, and enter quantity as a whole number of at least 1.", "error")
+            return render_template("donate.html", facilities=facilities), 400
+
+        if Facility.query.get(facility_id) is None:
+            flash("That facility could not be found — please choose one from the list.", "error")
             return render_template("donate.html", facilities=facilities), 400
 
         donation = SupplyDonation(
             facility_id=facility_id,
-            item_name=request.form["item_name"].strip(),
-            category=request.form["category"],
+            item_name=item_name,
+            category=category,
             quantity=quantity,
             unit=request.form.get("unit", "units"),
             expiry_date=expiry_date,

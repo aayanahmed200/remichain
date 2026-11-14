@@ -32,13 +32,12 @@ flask run --reload
 
 Open `http://localhost:5000`.
 
+Run the tests with `pytest tests/` to check the matching service, including urgency and expiry scoring.
+
 ## Notes and limitations
 
 Matches remain in the `proposed` state; an accept/decline workflow is not implemented yet. A request can remain partially fulfilled and receive another match in a later pass.
 
-## Tests
-
-Run `pytest tests/` to check the matching service, including urgency and expiry scoring.
 
 ## License
 

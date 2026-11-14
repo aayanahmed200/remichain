@@ -14,7 +14,7 @@ Facilities can list surplus donations and submit requests. The matching service 
 - Rank potential matches using four scoring factors.
 - Track proposed, reserved, partially fulfilled, and fulfilled states.
 - View a dashboard and query donations, requests, and matches through a JSON API.
-- Matching passes are designed to avoid duplicate proposals when no new data has been added.
+- Avoid duplicate proposals when no new data has been added.
 
 ## Technology
 
@@ -23,8 +23,6 @@ Python, Flask, Flask-SQLAlchemy, SQLite, and pytest.
 ## Run locally
 
 ```bash
-git clone https://github.com/aayanahmed200/remichain.git
-cd remichain
 python -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt

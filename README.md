@@ -15,6 +15,7 @@ Facilities can list surplus donations and submit requests. The matching service 
 - Track proposed, reserved, partially fulfilled, and fulfilled states.
 - View a dashboard and query donations, requests, and matches through a JSON API.
 - Avoid duplicate proposals when no new data has been added.
+- The current matching flow creates proposed matches; the accept/decline workflow is not implemented.
 
 ## Technology
 
@@ -33,10 +34,6 @@ flask run --reload
 Open `http://localhost:5000`.
 
 Run the tests with `pytest tests/` to check the matching service, including urgency and expiry scoring.
-
-## Notes and limitations
-
-Matches remain in the `proposed` state; an accept/decline workflow is not implemented yet. A request can remain partially fulfilled and receive another match in a later pass.
 
 
 ## License

@@ -1,45 +1,24 @@
 # RemiChain
 
-[![Python](https://img.shields.io/badge/python-3776AB?style=for-the-badge&logo=python&logoColor=white)](https://www.python.org/)
-[![Flask](https://img.shields.io/badge/flask-000000?style=for-the-badge&logo=flask&logoColor=white)](https://flask.palletsprojects.com/)
-[![SQLite](https://img.shields.io/badge/sqlite-003B57?style=for-the-badge&logo=sqlite&logoColor=white)](https://www.sqlite.org/)
-**Repository:** [remichain](https://github.com/aayanahmed200/remichain)
+[![Python](https://img.shields.io/badge/python-3776AB?style=for-the-badge&logo=python&logoColor=white)](https://www.python.org/) [![Flask](https://img.shields.io/badge/flask-000000?style=for-the-badge&logo=flask&logoColor=white)](https://flask.palletsprojects.com/) [![SQLite](https://img.shields.io/badge/sqlite-003B57?style=for-the-badge&logo=sqlite&logoColor=white)](https://www.sqlite.org/)
 
-RemiChain matches surplus medical supplies with the facilities that need them, instead of letting usable equipment and medication expire in storage while other clinics run short.
+RemiChain is a Flask prototype that matches surplus medical supplies with facility requests, helping organisations identify potential transfers before supplies expire.
 
 ## Overview
 
-Hospitals and clinics regularly end up with supplies they can't use in time — equipment nobody needs right now, medication approaching its expiry date — while other facilities nearby are short on essential items. RemiChain connects donors with requesters and recommends efficient matches.
+Facilities can list surplus donations and submit requests. The matching service scores donation-request pairs using urgency, proximity, quantity fit, and expiry proximity, then creates proposed matches.
 
-## How it works
+## Highlights
 
-Facilities list surplus supplies as donations and log what they need as requests. A matching engine (`app/services/matching.py`) scores every possible donation-to-request pair using four factors: urgency, proximity, quantity match, and expiration proximity, then proposes the best available donation for each open request as a `Match` record (`status="proposed"`).
-
-Once a donation is matched it's marked `reserved` so it won't be proposed again; a request becomes `fulfilled` once a match covers its full need, or stays `partially_fulfilled` (still eligible for another pass) otherwise. This keeps `run_matching_pass` / `POST /api/run-matching` idempotent — calling it again without new donations or requests creates no duplicate matches. There is no accept/decline workflow yet; matches stay in the `proposed` state once created.
-
-## Capabilities
-
-- List surplus supplies as donations, with quantity, category, and expiry date
-- Log open requests from facilities, with an urgency score
-- Automatic matching engine that proposes the best available match for each request
-- Dashboard showing recent donations, requests, and matches
-- A small JSON API (`/api/donations`, `/api/requests`, `/api/matches`, `/api/run-matching`) for querying and triggering matches
+- Create and manage facility donations and supply requests.
+- Rank potential matches using four scoring factors.
+- Track proposed, reserved, partially fulfilled, and fulfilled states.
+- View a dashboard and query donations, requests, and matches through a JSON API.
+- Matching passes are designed to avoid duplicate proposals when no new data has been added.
 
 ## Technology
 
-- Python
-- Flask
-- Flask-SQLAlchemy (SQLite by default)
-- pytest for the matching engine tests
-
-## Repository structure
-
-- `app/models/` - Facility, SupplyDonation, SupplyRequest, Match
-- `app/routes/` - main pages, donation/request forms, JSON API
-- `app/services/matching.py` - the scoring and matching logic
-- `app/services/seed.py` - sample facility data used on first run
-- `tests/test_matching.py` - tests for the matching engine
-- `LICENSE`
+Python, Flask, Flask-SQLAlchemy, SQLite, and pytest.
 
 ## Run locally
 
@@ -53,12 +32,16 @@ export FLASK_APP=app
 flask run --reload
 ```
 
-Open http://localhost:5000 to view the dashboard.
+Open `http://localhost:5000`.
 
-## Testing
+## Notes and limitations
 
-- `tests/test_matching.py` - covers the matching engine: urgency/expiry scoring, expired donations never matching, and ranked results for a request. Run with `pytest tests/`.
+Matches remain in the `proposed` state; an accept/decline workflow is not implemented yet. A request can remain partially fulfilled and receive another match in a later pass.
+
+## Tests
+
+Run `pytest tests/` to check the matching service, including urgency and expiry scoring.
 
 ## License
 
-MIT — see [LICENSE](LICENSE).
+MIT — see `LICENSE`.

@@ -2,7 +2,7 @@
 
 [![Python](https://img.shields.io/badge/python-3776AB?style=for-the-badge&logo=python&logoColor=white)](https://www.python.org/) [![Flask](https://img.shields.io/badge/flask-000000?style=for-the-badge&logo=flask&logoColor=white)](https://flask.palletsprojects.com/) [![SQLite](https://img.shields.io/badge/sqlite-003B57?style=for-the-badge&logo=sqlite&logoColor=white)](https://www.sqlite.org/)
 
-RemiChain is a Flask prototype that matches surplus medical supplies with facility requests, helping organisations identify potential transfers before supplies expire.
+RemiChain is a Flask prototype for matching surplus medical supplies with facility requests before supplies expire.
 
 ## Overview
 
@@ -15,7 +15,6 @@ Facilities can list surplus donations and submit requests. The matching service 
 - Track proposed, reserved, partially fulfilled, and fulfilled states.
 - View a dashboard and query donations, requests, and matches through a JSON API.
 - Avoid duplicate proposals when no new data has been added.
-- The current matching flow creates proposed matches; the accept/decline workflow is not implemented.
 
 ## Technology
 
@@ -33,8 +32,15 @@ flask run --reload
 
 Open `http://localhost:5000`.
 
-Run the tests with `pytest tests/` to check the matching service, including urgency and expiry scoring.
+Run the tests with:
 
+```bash
+pytest tests/
+```
+
+## Notes and limitations
+
+This is a prototype. The current matching flow creates proposed matches; an accept/decline workflow is not implemented.
 
 ## License
 

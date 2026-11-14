@@ -3,20 +3,21 @@
 [![Python](https://img.shields.io/badge/python-3776AB?style=for-the-badge&logo=python&logoColor=white)](https://www.python.org/)
 [![Flask](https://img.shields.io/badge/flask-000000?style=for-the-badge&logo=flask&logoColor=white)](https://flask.palletsprojects.com/)
 [![SQLite](https://img.shields.io/badge/sqlite-003B57?style=for-the-badge&logo=sqlite&logoColor=white)](https://www.sqlite.org/)
+**Repository:** [remichain](https://github.com/aayanahmed200/remichain)
 
 RemiChain matches surplus medical supplies with the facilities that need them, instead of letting usable equipment and medication expire in storage while other clinics run short.
 
-## Why this exists
+## Overview
 
 Hospitals and clinics regularly end up with supplies they can't use in time — equipment nobody needs right now, medication approaching its expiry date — while other facilities nearby are short on essential items. RemiChain connects donors with requesters and recommends efficient matches.
 
-## How the matching works
+## How it works
 
 Facilities list surplus supplies as donations and log what they need as requests. A matching engine (`app/services/matching.py`) scores every possible donation-to-request pair using four factors: urgency, proximity, quantity match, and expiration proximity, then proposes the best available donation for each open request as a `Match` record (`status="proposed"`).
 
 Once a donation is matched it's marked `reserved` so it won't be proposed again; a request becomes `fulfilled` once a match covers its full need, or stays `partially_fulfilled` (still eligible for another pass) otherwise. This keeps `run_matching_pass` / `POST /api/run-matching` idempotent — calling it again without new donations or requests creates no duplicate matches. There is no accept/decline workflow yet; matches stay in the `proposed` state once created.
 
-## Features
+## Capabilities
 
 - List surplus supplies as donations, with quantity, category, and expiry date
 - Log open requests from facilities, with an urgency score
@@ -24,14 +25,14 @@ Once a donation is matched it's marked `reserved` so it won't be proposed again;
 - Dashboard showing recent donations, requests, and matches
 - A small JSON API (`/api/donations`, `/api/requests`, `/api/matches`, `/api/run-matching`) for querying and triggering matches
 
-## Tech stack
+## Technology
 
 - Python
 - Flask
 - Flask-SQLAlchemy (SQLite by default)
 - pytest for the matching engine tests
 
-## Project structure
+## Repository structure
 
 - `app/models/` - Facility, SupplyDonation, SupplyRequest, Match
 - `app/routes/` - main pages, donation/request forms, JSON API
@@ -40,7 +41,7 @@ Once a donation is matched it's marked `reserved` so it won't be proposed again;
 - `tests/test_matching.py` - tests for the matching engine
 - `LICENSE`
 
-## Setup
+## Run locally
 
 ```bash
 git clone https://github.com/aayanahmed200/remichain.git
@@ -54,7 +55,7 @@ flask run --reload
 
 Open http://localhost:5000 to view the dashboard.
 
-## Tests
+## Testing
 
 - `tests/test_matching.py` - covers the matching engine: urgency/expiry scoring, expired donations never matching, and ranked results for a request. Run with `pytest tests/`.
 

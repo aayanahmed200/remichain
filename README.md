@@ -1,24 +1,25 @@
 # RemiChain
 
-[![Python](https://img.shields.io/badge/python-3776AB?style=for-the-badge&logo=python&logoColor=white)](https://www.python.org/) [![Flask](https://img.shields.io/badge/flask-000000?style=for-the-badge&logo=flask&logoColor=white)](https://flask.palletsprojects.com/) [![SQLite](https://img.shields.io/badge/sqlite-003B57?style=for-the-badge&logo=sqlite&logoColor=white)](https://www.sqlite.org/)
-
-RemiChain is a Flask prototype for matching surplus medical supplies with facility requests before supplies expire.
+A Flask prototype that ranks possible matches between surplus medical-supply donations and requests from healthcare facilities.
 
 ## Overview
 
-Facilities can list surplus donations and submit requests. The matching service scores donation-request pairs using urgency, proximity, quantity fit, and expiry proximity, then creates proposed matches.
+Facilities can post available supplies and submit requests. The matching service compares open requests with available donations for the same item, then scores possible matches using request urgency, expiry timing, geographic distance and how much of the requested quantity a donation can cover.
 
-## Highlights
+The app includes facility pages, donation and request forms, a matching service, and JSON endpoints for viewing records and running a matching pass.
 
-- Create and manage facility donations and supply requests.
-- Rank potential matches using four scoring factors.
-- Track proposed, reserved, partially fulfilled, and fulfilled states.
-- View a dashboard and query donations, requests, and matches through a JSON API.
-- Avoid duplicate proposals when no new data has been added.
+## Repository contents
+
+- `app/models/` — facility, donation, request and match data models.
+- `app/routes/` — page routes and JSON API endpoints.
+- `app/services/matching.py` — distance calculation, scoring and match creation.
+- `templates/` and `static/` — Flask templates and frontend assets.
+- `config.py` and `run.py` — application configuration and entry point.
+- `tests/` — matching-engine tests.
 
 ## Technology
 
-Python, Flask, Flask-SQLAlchemy, SQLite, and pytest.
+Python, Flask, Flask-SQLAlchemy, SQLite and pytest. Flask-SQLAlchemy manages the application data; the database is created when the app starts.
 
 ## Run locally
 
@@ -26,11 +27,10 @@ Python, Flask, Flask-SQLAlchemy, SQLite, and pytest.
 python -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
-export FLASK_APP=app
-flask run --reload
+python run.py
 ```
 
-Open `http://localhost:5000`.
+Open [http://localhost:5000](http://localhost:5000).
 
 Run the tests with:
 
@@ -38,10 +38,12 @@ Run the tests with:
 pytest tests/
 ```
 
-## Notes and limitations
+On Windows, activate the environment with `.venv\\Scripts\\activate` instead of the `source` command.
 
-This is a prototype. The current matching flow creates proposed matches; an accept/decline workflow is not implemented.
+## Scope and limitations
+
+This is a prototype, not a live medical-supply exchange. Match scores are heuristic suggestions based on the fields available in the app; they do not verify stock quality, regulatory requirements, transport arrangements or clinical suitability. The current workflow creates and tracks proposed matches, but does not provide a complete accept/decline and fulfilment process between real facilities.
 
 ## License
 
-MIT — see `LICENSE`.
+MIT. See [LICENSE](LICENSE).

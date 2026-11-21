@@ -46,4 +46,4 @@ This is a prototype, not a live medical-supply exchange. Match scores are heuris
 
 ## License
 
-MIT. See [LICENSE](LICENSE).
+This project is licensed under the MIT License. See [LICENSE](LICENSE) for the full text.

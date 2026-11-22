@@ -3,6 +3,8 @@ from flask import Blueprint, flash, redirect, render_template, request, url_for
 from app import db
 from app.auth import current_facility, login_facility, logout_facility
 from app.models import Facility
+from app.ratelimit import enforce
+from app.validation import MAX_CITY, MAX_EMAIL, MAX_PASSWORD, MAX_NAME, trimmed
 
 auth_bp = Blueprint("auth", __name__)
 
@@ -41,8 +43,19 @@ def login():
         return redirect(url_for("main.dashboard"))
 
     if request.method == "POST":
-        email = _clean_email(request.form.get("email"))
+        # Ten tries per IP per five minutes: enough for a mistyped password,
+        # far too few to guess one.
+        enforce("login", 10, 300)
+
+        email = _clean_email(trimmed(request.form.get("email"), MAX_EMAIL)[0])
         password = request.form.get("password", "")
+
+        # Refuse absurd input before hashing it; hashing megabytes of text is
+        # a cheap way to burn a worker.
+        if len(password) > MAX_PASSWORD:
+            flash("That email and password do not match a facility account.", "error")
+            return render_template("login.html", form=request.form, next=request.form.get("next", "")), 401
+
         facility = (
             Facility.query.filter(db.func.lower(Facility.contact_email) == email).first()
             if email
@@ -78,17 +91,23 @@ def claim():
     an account that is already in use.
     """
     if request.method == "POST":
-        name = request.form.get("name", "").strip()
-        city = request.form.get("city", "").strip()
-        email = _clean_email(request.form.get("email"))
+        enforce("claim", 10, 300)
+
+        name, name_long = trimmed(request.form.get("name"), MAX_NAME)
+        city, city_long = trimmed(request.form.get("city"), MAX_CITY)
+        email = _clean_email(trimmed(request.form.get("email"), MAX_EMAIL)[0])
         password = request.form.get("password", "")
         confirm = request.form.get("password_confirm", "")
 
         errors = []
         if not name:
             errors.append("Enter the facility name exactly as it appears on the network list.")
+        elif name_long:
+            errors.append(f"Facility name must be {MAX_NAME} characters or fewer.")
         if not city:
             errors.append("Enter the facility's city.")
+        elif city_long:
+            errors.append(f"City must be {MAX_CITY} characters or fewer.")
         if not _valid_email(email):
             errors.append("Enter a valid email — it becomes your sign-in address.")
         problem = _password_problem(password, confirm)

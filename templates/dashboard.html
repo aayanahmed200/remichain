@@ -10,6 +10,7 @@
   </div>
   <div class="page-actions">
     <form class="inline-form" method="POST" action="{{ url_for('main.run_matching') }}" data-busy>
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
       <button type="submit" class="btn btn-primary">Run matching pass</button>
     </form>
     <a class="btn btn-secondary" href="{{ url_for('donations.donate') }}">New donation</a>
@@ -109,13 +110,16 @@
               <div class="actions">
                 {% if m.status == 'proposed' %}
                   <form class="inline-form" method="POST" action="{{ url_for('matches.set_status', match_id=m.id, action='accept') }}" data-busy>
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                     <button class="btn btn-secondary btn-sm" type="submit">Accept</button>
                   </form>
                   <form class="inline-form" method="POST" action="{{ url_for('matches.set_status', match_id=m.id, action='decline') }}" data-busy>
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                     <button class="btn btn-quiet btn-sm" type="submit">Decline</button>
                   </form>
                 {% elif m.status == 'accepted' %}
                   <form class="inline-form" method="POST" action="{{ url_for('matches.set_status', match_id=m.id, action='complete') }}" data-busy>
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                     <button class="btn btn-secondary btn-sm" type="submit">Mark complete</button>
                   </form>
                 {% else %}
@@ -133,6 +137,7 @@
       <strong>No matches yet</strong>
       <span>Post stock or a request with the same item name, then run a matching pass.</span>
       <form class="inline-form" method="POST" action="{{ url_for('main.run_matching') }}" data-busy>
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
         <button type="submit" class="btn btn-primary btn-sm">Run matching pass</button>
       </form>
     </div>

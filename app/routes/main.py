@@ -5,6 +5,7 @@ from sqlalchemy import or_
 
 from app.auth import current_facility, login_required
 from app.models import Facility, Match, SupplyDonation, SupplyRequest
+from app.ratelimit import enforce
 from app.services.matching import run_matching_pass
 from config import BASE_DIR
 
@@ -109,6 +110,7 @@ def dashboard():
 @login_required
 def run_matching():
     facility = current_facility()
+    enforce("match_run", 10, 60, identity=facility.id)
     created = run_matching_pass(donor_facility_id=facility.id)
     if created:
         noun = "match" if len(created) == 1 else "matches"

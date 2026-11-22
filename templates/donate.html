@@ -12,6 +12,8 @@
 
 <div class="form-layout single">
   <form method="POST" class="form-card" data-busy>
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
     <div class="field">
       <label>Facility</label>
       <p class="field-static">{{ facility.name }}<span class="muted">{{ facility.city }}, {{ facility.country }}</span></p>

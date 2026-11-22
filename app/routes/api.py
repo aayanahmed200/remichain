@@ -1,8 +1,11 @@
+import hmac
 import os
 
 from flask import Blueprint, jsonify, request
 
+from app.auth import current_facility
 from app.models import SupplyDonation, SupplyRequest, Match
+from app.ratelimit import consume
 from app.services.matching import run_matching_pass, find_matches_for_request
 from app.services.sweep import run_maintenance
 
@@ -10,20 +13,16 @@ api_bp = Blueprint("api", __name__)
 
 
 def _cron_authorized():
-    """Allow Vercel's scheduler, and nothing else.
+    """Only Vercel's scheduler, proved by the shared secret.
 
-    With CRON_SECRET set, the bearer token Vercel sends is the only way in.
-    Without it, fall back to Vercel's own request signature plus loopback so
-    local development and a fresh deploy both work unattended.
+    Without CRON_SECRET the job is refused rather than trusting a user agent,
+    which anyone can copy. Loopback stays open so local development works.
     """
     secret = os.environ.get("CRON_SECRET", "").strip()
     if secret:
-        return request.headers.get("Authorization", "") == f"Bearer {secret}"
-
-    if request.headers.get("x-vercel-cron"):
-        return True
-    if request.headers.get("User-Agent", "").startswith("vercel-cron"):
-        return True
+        return hmac.compare_digest(
+            request.headers.get("Authorization", ""), f"Bearer {secret}"
+        )
     return request.remote_addr in ("127.0.0.1", "::1")
 
 
@@ -53,7 +52,21 @@ def candidates_for_request(request_id):
 
 @api_bp.route("/run-matching", methods=["POST"])
 def trigger_matching_pass():
-    created = run_matching_pass()
+    """Run matching for the signed-in facility's own stock.
+
+    This used to be a public POST that ran the whole network's matching pass,
+    which let anyone cause writes by hitting a URL. The site-wide pass now
+    belongs to the scheduled job; this endpoint is scoped like the dashboard
+    button.
+    """
+    facility = current_facility()
+    if facility is None:
+        return jsonify({"error": "sign in with a facility account to run matching"}), 401
+
+    if not consume("api_match_run", 10, 60, identity=facility.id):
+        return jsonify({"error": "too many matching passes, wait a minute"}), 429
+
+    created = run_matching_pass(donor_facility_id=facility.id)
     return jsonify({"matches_created": len(created), "matches": [m.to_dict() for m in created]})
 
 

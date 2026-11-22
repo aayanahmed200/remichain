@@ -3,11 +3,18 @@ from flask import Blueprint, flash, redirect, render_template, request, url_for
 from app import db
 from app.auth import current_facility, login_facility
 from app.models import Facility
+from app.ratelimit import enforce
 from app.routes.auth import _password_problem, _valid_email
+from app.validation import (
+    FACILITY_TYPES,
+    MAX_CITY,
+    MAX_COUNTRY,
+    MAX_EMAIL,
+    MAX_NAME,
+    trimmed,
+)
 
 facilities_bp = Blueprint("facilities", __name__)
-
-FACILITY_TYPES = ["hospital", "clinic", "pharmacy", "ngo"]
 
 
 def _coordinate(raw, label, low, high, errors):
@@ -28,21 +35,31 @@ def _coordinate(raw, label, low, high, errors):
 @facilities_bp.route("/facilities/new", methods=["GET", "POST"])
 def new_facility():
     if request.method == "POST":
-        name = request.form.get("name", "").strip()
-        city = request.form.get("city", "").strip()
-        country = request.form.get("country", "").strip()
-        facility_type = request.form.get("facility_type", "hospital").strip().lower()
-        email = request.form.get("contact_email", "").strip().lower()
+        # Registration writes a row and hashes a password, so it is worth
+        # slowing down: five attempts per IP per ten minutes.
+        enforce("register", 5, 600)
+
+        name, name_long = trimmed(request.form.get("name"), MAX_NAME)
+        city, city_long = trimmed(request.form.get("city"), MAX_CITY)
+        country, country_long = trimmed(request.form.get("country"), MAX_COUNTRY)
+        facility_type = trimmed(request.form.get("facility_type"), 20)[0].lower()
+        email = trimmed(request.form.get("contact_email"), MAX_EMAIL)[0].lower()
         password = request.form.get("password", "")
         confirm = request.form.get("password_confirm", "")
 
         errors = []
         if not name:
             errors.append("Facility name is required.")
+        elif name_long:
+            errors.append(f"Facility name must be {MAX_NAME} characters or fewer.")
         if not city:
             errors.append("City is required.")
+        elif city_long:
+            errors.append(f"City must be {MAX_CITY} characters or fewer.")
         if not country:
             errors.append("Country is required.")
+        elif country_long:
+            errors.append(f"Country must be {MAX_COUNTRY} characters or fewer.")
         if facility_type not in FACILITY_TYPES:
             facility_type = "hospital"
         if not _valid_email(email):

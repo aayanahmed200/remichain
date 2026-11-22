@@ -71,6 +71,10 @@ def create_app(config_class=Config):
     app.register_blueprint(matches_bp)
     app.register_blueprint(api_bp, url_prefix="/api")
 
+    from app.security import init_security
+
+    init_security(app)
+
     @app.context_processor
     def inject_account():
         from app.auth import current_facility
@@ -88,6 +92,9 @@ def create_app(config_class=Config):
 
     with app.app_context():
         try:
+            # Imported here so the model is registered before create_all().
+            from app.models import RateLimit  # noqa: F401
+
             db.create_all()
             _ensure_schema_columns()
             from app.services.seed import seed_facilities

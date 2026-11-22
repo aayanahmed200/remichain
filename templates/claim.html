@@ -12,6 +12,8 @@
 
 <div class="form-layout single">
   <form method="POST" class="form-card" data-busy>
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
     <div class="field">
       <label for="name">Facility name</label>
       <input type="text" id="name" name="name" value="{{ form.get('name', '') }}" placeholder="Jinnah Community Clinic" required autocomplete="organization">

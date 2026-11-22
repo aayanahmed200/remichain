@@ -3,7 +3,19 @@ from flask import Blueprint, render_template, request, redirect, url_for, flash
 from app import db
 from app.auth import current_facility, login_required
 from app.models import SupplyRequest
+from app.ratelimit import enforce
 from app.services.matching import find_matches_for_request, create_match
+from app.validation import (
+    CATEGORIES,
+    MAX_CATEGORY,
+    MAX_ITEM_NAME,
+    MAX_NOTES,
+    MAX_QUANTITY,
+    MAX_UNIT,
+    URGENCIES,
+    trimmed,
+    whole_number,
+)
 
 requests_bp = Blueprint("requests", __name__)
 
@@ -14,17 +26,41 @@ def request_supply():
     facility = current_facility()
 
     if request.method == "POST":
-        try:
-            quantity_needed = int(request.form["quantity_needed"])
-            item_name = request.form["item_name"].strip()
-            category = request.form["category"].strip()
-            if not item_name or not category or quantity_needed < 1:
-                raise ValueError("missing or invalid field")
-        except (KeyError, ValueError):
-            flash(
-                "Please enter an item name and category, and enter quantity needed as a whole number of at least 1.",
-                "error",
-            )
+        enforce("request", 30, 60, identity=facility.id)
+
+        errors = []
+
+        item_name, item_long = trimmed(request.form.get("item_name"), MAX_ITEM_NAME)
+        if not item_name:
+            errors.append("Item needed is required.")
+        elif item_long:
+            errors.append(f"Item needed must be {MAX_ITEM_NAME} characters or fewer.")
+
+        category = trimmed(request.form.get("category"), MAX_CATEGORY)[0]
+        if category not in CATEGORIES:
+            errors.append("Choose a category from the list.")
+
+        quantity_needed, quantity_error = whole_number(
+            request.form.get("quantity_needed"), 1, MAX_QUANTITY
+        )
+        if quantity_error:
+            errors.append(quantity_error)
+
+        unit, unit_long = trimmed(request.form.get("unit") or "units", MAX_UNIT)
+        if unit_long:
+            errors.append(f"Unit must be {MAX_UNIT} characters or fewer.")
+
+        urgency = trimmed(request.form.get("urgency"), 20)[0]
+        if urgency not in URGENCIES:
+            urgency = "medium"
+
+        notes, notes_long = trimmed(request.form.get("notes"), MAX_NOTES)
+        if notes_long:
+            errors.append(f"Notes must be {MAX_NOTES} characters or fewer.")
+
+        if errors:
+            for error in errors:
+                flash(error, "error")
             return render_template("request.html", facility=facility), 400
 
         need = SupplyRequest(
@@ -34,9 +70,9 @@ def request_supply():
             item_name=item_name,
             category=category,
             quantity_needed=quantity_needed,
-            unit=request.form.get("unit", "units"),
-            urgency=request.form.get("urgency", "medium"),
-            notes=request.form.get("notes", "").strip(),
+            unit=unit or "units",
+            urgency=urgency,
+            notes=notes,
         )
         db.session.add(need)
         db.session.commit()

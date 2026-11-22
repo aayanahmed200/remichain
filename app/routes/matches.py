@@ -2,7 +2,8 @@ from flask import Blueprint, flash, redirect, url_for
 
 from app.auth import current_facility, login_required, owns_match
 from app.models import Match
-from app.services.matching import change_match_status
+from app.ratelimit import enforce
+from app.services.matching import MATCH_ACTIONS, change_match_status
 
 matches_bp = Blueprint("matches", __name__)
 
@@ -12,6 +13,12 @@ matches_bp = Blueprint("matches", __name__)
 def set_status(match_id, action):
     """Accept, decline or complete a match that involves this facility."""
     facility = current_facility()
+    enforce("match_action", 60, 60, identity=facility.id)
+
+    if action not in MATCH_ACTIONS:
+        flash("Unknown match action.", "error")
+        return redirect(url_for("main.dashboard"))
+
     match = Match.query.get_or_404(match_id)
 
     # A match belongs to its donor and its recipient, nobody else. Without this

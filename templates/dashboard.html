@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% from "_icons.html" import icon %}
 {% block title %}Dashboard — RemiChain{% endblock %}
 {% block description %}Accept, decline or complete proposed matches between surplus medical stock and open requests.{% endblock %}
 
@@ -21,19 +22,19 @@
 <div class="stats">
   <div class="stat">
     <span class="stat-value">{{ stats.facilities }}</span>
-    <span class="stat-label">Facilities</span>
+    <span class="stat-label">{{ icon('facility', 15) }} Facilities</span>
   </div>
   <div class="stat">
     <span class="stat-value">{{ stats.available_donations }}</span>
-    <span class="stat-label">Available</span>
+    <span class="stat-label">{{ icon('box', 15) }} Available</span>
   </div>
   <div class="stat">
     <span class="stat-value">{{ stats.open_requests }}</span>
-    <span class="stat-label">Waiting</span>
+    <span class="stat-label">{{ icon('clock', 15) }} Waiting</span>
   </div>
   <div class="stat">
     <span class="stat-value">{{ stats.matches_made }}</span>
-    <span class="stat-label">Matched</span>
+    <span class="stat-label">{{ icon('handoff', 15) }} Matched</span>
   </div>
 </div>
 

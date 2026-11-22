@@ -1,0 +1,26 @@
+{# Line icons drawn on a 24px grid, 1.75px stroke. One shape language, currentColor. #}
+{% macro icon(name, size=22) -%}
+<svg class="ico" width="{{ size }}" height="{{ size }}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+{%- if name == 'box' -%}
+  <path d="M20.5 8.2 12 3.5 3.5 8.2v7.6L12 20.5l8.5-4.7V8.2Z"/><path d="M3.7 8.2 12 12.9l8.3-4.7"/><path d="M12 12.9v7.6"/>
+{%- elif name == 'gauge' -%}
+  <path d="M4.5 17.5a8.3 8.3 0 1 1 15 0"/><path d="m12 17.5 4-6"/><circle cx="12" cy="17.5" r="1.3"/>
+{%- elif name == 'handoff' -%}
+  <path d="M10.5 13.5a4 4 0 0 0 5.7 0l2.3-2.3a4 4 0 0 0-5.7-5.7l-1.2 1.2"/><path d="M13.5 10.5a4 4 0 0 0-5.7 0l-2.3 2.3a4 4 0 0 0 5.7 5.7l1.2-1.2"/>
+{%- elif name == 'bolt' -%}
+  <path d="M13 3 5 13.5h5.2L10 21l8-11h-5.2l.2-7Z"/>
+{%- elif name == 'clock' -%}
+  <circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/>
+{%- elif name == 'pin' -%}
+  <path d="M12 21c4-4.2 6-7.4 6-10a6 6 0 1 0-12 0c0 2.6 2 5.8 6 10Z"/><circle cx="12" cy="11" r="2.3"/>
+{%- elif name == 'layers' -%}
+  <path d="m12 3 8 4.2-8 4.2-8-4.2L12 3Z"/><path d="m4 12 8 4.2 8-4.2"/><path d="m4 16.5 8 4.2 8-4.2"/>
+{%- elif name == 'facility' -%}
+  <path d="M4 20V8.5L12 4l8 4.5V20"/><path d="M9 20v-5.5h6V20"/><path d="M12 7.5v4"/><path d="M10 9.5h4"/>
+{%- elif name == 'inbox' -%}
+  <path d="M4 13h4l1.5 3h5L16 13h4"/><path d="M4.6 13 7 5h10l2.4 8v5.5H4.6V13Z"/>
+{%- elif name == 'plus' -%}
+  <path d="M12 5v14"/><path d="M5 12h14"/>
+{%- endif -%}
+</svg>
+{%- endmacro %}

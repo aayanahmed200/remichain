@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% from "_icons.html" import icon %}
 {% block title %}RemiChain — surplus medical stock, matched before it expires{% endblock %}
 {% block description %}Post surplus hospital supplies and RemiChain scores them against nearby open requests, then proposes the handoff.{% endblock %}
 
@@ -8,8 +9,8 @@
     <h1>Expiring stock, matched to the facility that needs it.</h1>
     <p class="hero-lead">Post what you can spare. RemiChain scores it against nearby requests and proposes the handoff.</p>
     <div class="hero-actions">
-      <a class="btn btn-primary btn-lg" href="{{ url_for('donations.donate') }}">Post surplus stock</a>
-      <a class="btn btn-secondary btn-lg" href="{{ url_for('requests.request_supply') }}">Post a request</a>
+      <a class="btn btn-primary btn-lg" href="{{ url_for('donations.donate') }}">{{ icon('box', 18) }} Post surplus stock</a>
+      <a class="btn btn-secondary btn-lg" href="{{ url_for('requests.request_supply') }}">{{ icon('inbox', 18) }} Post a request</a>
     </div>
   </div>
 
@@ -72,13 +73,65 @@
 </section>
 
 <section class="section">
-  <h2 class="section-title">Scoring</h2>
-  <ol class="rank">
-    <li><span class="num">01</span>Urgency</li>
-    <li><span class="num">02</span>Expiry</li>
-    <li><span class="num">03</span>Distance</li>
-    <li><span class="num">04</span>Quantity</li>
+  <h2 class="section-title">How a match happens</h2>
+  <ol class="steps">
+    <li class="step">
+      <span class="step-icon">{{ icon('box', 22) }}</span>
+      <h3>List what you can spare</h3>
+      <p>Quantity, expiry and location, in the words your unit already uses.</p>
+    </li>
+    <li class="step">
+      <span class="step-icon">{{ icon('gauge', 22) }}</span>
+      <h3>Every open request is scored</h3>
+      <p>Four signals, one pass, ranked best first for each request.</p>
+    </li>
+    <li class="step">
+      <span class="step-icon">{{ icon('handoff', 22) }}</span>
+      <h3>Accept and hand off</h3>
+      <p>Both facilities see the match, then confirm the pickup.</p>
+    </li>
   </ol>
+</section>
+
+<section class="section">
+  <h2 class="section-title">What the score weighs</h2>
+  <ul class="weights">
+    <li class="weight">
+      <span class="weight-icon">{{ icon('bolt', 20) }}</span>
+      <span class="weight-name">Urgency</span>
+      <span class="weight-value">&times;3</span>
+    </li>
+    <li class="weight">
+      <span class="weight-icon">{{ icon('clock', 20) }}</span>
+      <span class="weight-name">Expiry</span>
+      <span class="weight-value">&times;2</span>
+    </li>
+    <li class="weight">
+      <span class="weight-icon">{{ icon('pin', 20) }}</span>
+      <span class="weight-name">Distance</span>
+      <span class="weight-value">&times;1.5</span>
+    </li>
+    <li class="weight">
+      <span class="weight-icon">{{ icon('layers', 20) }}</span>
+      <span class="weight-name">Coverage</span>
+      <span class="weight-value">&times;1</span>
+    </li>
+  </ul>
+</section>
+
+<section class="section">
+  <div class="section-head">
+    <h2 class="section-title">The dashboard, with a live match</h2>
+    <a class="btn btn-secondary btn-sm" href="{{ url_for('main.dashboard') }}">Open dashboard</a>
+  </div>
+
+  <figure class="shot">
+    <div class="shot-bar" aria-hidden="true">
+      <span class="shot-dot"></span><span class="shot-dot"></span><span class="shot-dot"></span>
+      <span class="shot-url">remichain.vercel.app/dashboard</span>
+    </div>
+    <img src="{{ url_for('static', filename='images/demo-dashboard.png') }}" width="1440" height="669" alt="RemiChain dashboard showing three proposed matches with scores, urgency and accept or decline actions" loading="lazy" decoding="async">
+  </figure>
 </section>
 
 {% if facilities %}

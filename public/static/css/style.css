@@ -296,13 +296,6 @@ img { max-width: 100%; }
   background: var(--surface-2);
 }
 
-.product-bar .dot-set { display: flex; gap: 6px; }
-.product-bar .dot-set i {
-  width: 8px; height: 8px;
-  border-radius: 50%;
-  background: var(--line-2);
-}
-
 .product-title { font-size: 0.86rem; font-weight: 700; color: var(--ink); }
 
 .product-body { background: var(--surface); }
@@ -455,7 +448,6 @@ table.data tbody tr:hover { background: var(--orange-50); }
   text-align: center;
 }
 
-.empty svg { color: var(--orange-500); }
 .empty strong { color: var(--ink); font-size: 0.98rem; }
 .empty span { max-width: 36ch; font-size: 0.9rem; color: var(--muted); }
 .empty .btn { margin-top: var(--s2); }
@@ -578,40 +570,6 @@ table.data tbody tr:hover { background: var(--orange-50); }
   to { opacity: 1; transform: none; }
 }
 
-/* ---------- CTA band ---------- */
-
-.cta-band {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--s6);
-  flex-wrap: wrap;
-  margin: var(--s7) 0 var(--s8);
-  padding: var(--s6);
-  border-radius: var(--r-4);
-  background: var(--orange-600);
-  color: #fff;
-}
-
-.cta-band h2 { color: #fff; font-size: clamp(1.4rem, 2.2vw, 1.8rem); }
-.cta-band p { margin-top: var(--s2); max-width: 48ch; color: #ffe4d1; font-size: 0.95rem; }
-
-.cta-band .btn-primary {
-  background: #fff;
-  color: var(--orange-700);
-  box-shadow: none;
-}
-
-.cta-band .btn-primary:hover { background: var(--orange-50); }
-
-.cta-band .btn-secondary {
-  background: transparent;
-  color: #fff;
-  border-color: rgba(255, 255, 255, 0.55);
-}
-
-.cta-band .btn-secondary:hover { background: rgba(255, 255, 255, 0.12); border-color: #fff; }
-
 /* ---------- Footer ---------- */
 
 .site-footer {
@@ -646,8 +604,6 @@ table.data tbody tr:hover { background: var(--orange-50); }
 }
 
 @keyframes spin { to { transform: rotate(360deg); } }
-
-.is-busy { cursor: progress; }
 
 /* ---------- Responsive ---------- */
 

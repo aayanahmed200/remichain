@@ -97,8 +97,11 @@ def create_app(config_class=Config):
 
             db.create_all()
             _ensure_schema_columns()
+            from app.services.catalog import seed_catalog
             from app.services.seed import seed_facilities
+
             seed_facilities()
+            seed_catalog()
         except Exception:  # noqa: BLE001 - a cold start must not crash the site
             db.session.rollback()
             app.logger.exception("Could not initialise the database")

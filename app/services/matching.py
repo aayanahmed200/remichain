@@ -13,12 +13,13 @@ contributors should be able to follow the scoring logic without a math degree.
 """
 
 from datetime import date
-from math import radians, sin, cos, sqrt, atan2
+from math import ceil, radians, sin, cos, sqrt, atan2
 
 from flask import current_app
 
 from app import db
 from app.models import SupplyDonation, SupplyRequest, Match
+from app.services.catalog import base_quantity, catalog_item_for, items_pair
 
 
 def haversine_km(lat1, lon1, lat2, lon2):
@@ -66,15 +67,23 @@ def _proximity_score(donation, req):
 
 def score_pair(donation: SupplyDonation, req: SupplyRequest, cfg) -> float:
     """Weighted score for how good a donation-to-request match is. Higher is better."""
-    if donation.item_name.strip().lower() != req.item_name.strip().lower():
-        return -1.0  # not the same item at all
+    donation_item = catalog_item_for(donation.item_name, donation.category)
+    request_item = catalog_item_for(req.item_name, req.category)
+    if not items_pair(
+        donation_item, request_item, donation.item_name, req.item_name
+    ):
+        return -1.0  # not the same item
     if (donation.expiry_date and donation.expiry_date <= date.today()) or req.quantity_needed <= 0 or donation.quantity <= 0:
         return -1.0  # never match expired, non-positive, or malformed stock/request (avoid ZeroDivisionError below)
 
     urgency = req.urgency_score / 4.0  # normalize 0-1
     expiry = _expiry_urgency(donation)
     proximity = _proximity_score(donation, req)
-    coverage = min(donation.quantity / req.quantity_needed, 1.0)
+    # Coverage is compared in catalogue base units, so "2 boxes" of 100 masks
+    # covers a need for "50 masks". Weights themselves are unchanged.
+    donation_units = donation.quantity * base_quantity(donation_item, donation.unit)
+    needed_units = req.quantity_needed * base_quantity(request_item, req.unit)
+    coverage = min(donation_units / needed_units, 1.0)
 
     return (
         cfg.get("URGENCY_WEIGHT", 3.0) * urgency
@@ -117,7 +126,22 @@ def create_match(donation: SupplyDonation, req: SupplyRequest, score: float):
     this donation first (see the atomic update below) — callers should treat
     a None return as "no match created this time" rather than an error.
     """
-    matched_qty = min(donation.quantity, req.quantity_needed)
+    # Work out how much of the donation to take, in the donation's own unit.
+    donation_item = catalog_item_for(donation.item_name, donation.category)
+    request_item = catalog_item_for(req.item_name, req.category)
+    donor_factor = base_quantity(donation_item, donation.unit)
+    need_factor = base_quantity(request_item, req.unit)
+
+    needed_base = req.quantity_needed * need_factor
+    available_base = donation.quantity * donor_factor
+    take_base = min(available_base, needed_base)
+
+    if take_base >= available_base:
+        matched_qty = donation.quantity
+    else:
+        # Packs are indivisible: covering 50 tablets from a box of 100 takes
+        # the whole box, never half of one.
+        matched_qty = min(donation.quantity, max(1, ceil(take_base / donor_factor)))
 
     # Atomic check-and-decrement, not a plain `donation.quantity -= matched_qty`
     # in Python: this makes the claim race-safe. Two concurrent matching
@@ -164,7 +188,9 @@ def create_match(donation: SupplyDonation, req: SupplyRequest, score: float):
     # stays "partially_fulfilled", which run_matching_pass (and the dashboard
     # stats) already treat as still open for matching, so a later pass can
     # top it up from a different donation without re-touching this one.
-    req.status = "fulfilled" if matched_qty >= req.quantity_needed else "partially_fulfilled"
+    req.status = (
+        "fulfilled" if matched_qty * donor_factor >= needed_base else "partially_fulfilled"
+    )
 
     db.session.commit()
     return match

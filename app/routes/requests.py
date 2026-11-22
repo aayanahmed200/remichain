@@ -4,6 +4,7 @@ from app import db
 from app.auth import current_facility, login_required
 from app.models import SupplyRequest
 from app.ratelimit import enforce
+from app.services.catalog import catalog_item_for
 from app.services.matching import find_matches_for_request, create_match
 from app.validation import (
     CATEGORIES,
@@ -76,6 +77,10 @@ def request_supply():
         )
         db.session.add(need)
         db.session.commit()
+
+        # Add the spelling to the catalogue if it is new, so the next listing
+        # or request with the same wording resolves without guesswork.
+        catalog_item_for(item_name, category, create=True)
 
         # Immediately try to propose a match so the requester sees value right away
         best = find_matches_for_request(need, limit=1)

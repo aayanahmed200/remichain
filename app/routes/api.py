@@ -4,7 +4,7 @@ import os
 from flask import Blueprint, jsonify, request
 
 from app.auth import current_facility
-from app.models import SupplyDonation, SupplyRequest, Match
+from app.models import CatalogItem, SupplyDonation, SupplyRequest, Match
 from app.ratelimit import consume
 from app.services.matching import run_matching_pass, find_matches_for_request
 from app.services.sweep import run_maintenance
@@ -34,6 +34,12 @@ def list_donations():
 @api_bp.route("/requests", methods=["GET"])
 def list_requests():
     return jsonify([r.to_dict() for r in SupplyRequest.query.all()])
+
+
+@api_bp.route("/catalogue", methods=["GET"])
+def list_catalogue():
+    """The normalised catalogue: canonical names, aliases and pack sizes."""
+    return jsonify([item.to_dict() for item in CatalogItem.query.order_by(CatalogItem.name)])
 
 
 @api_bp.route("/matches", methods=["GET"])

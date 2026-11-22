@@ -22,7 +22,7 @@
       <div class="product-bar">
         <span class="dot-set" aria-hidden="true"><i></i><i></i><i></i></span>
         <span class="product-title">Matching console</span>
-        <span class="product-tag"><span class="num">{{ stats.matches_made }}</span> matches</span>
+        <span class="product-tag"><span class="num">{{ stats.matches_made }}</span> match{{ '' if stats.matches_made == 1 else 'es' }}</span>
       </div>
 
       <div class="product-body">

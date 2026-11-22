@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block title %}Page not found — RemiChain{% endblock %}
+{% block description %}That page does not exist. Head back to the RemiChain network, dashboard or matching pages.{% endblock %}
+
+{% block content %}
+<section class="error-page">
+  <p class="error-code">404</p>
+  <h1>That page isn&rsquo;t here.</h1>
+  <p>The link may be out of date, or the page may have moved. Everything on the network is reachable from the dashboard.</p>
+  <div class="page-actions">
+    {% if account %}
+      <a class="btn btn-primary" href="{{ url_for('main.dashboard') }}">Go to dashboard</a>
+    {% endif %}
+    <a class="btn btn-secondary" href="{{ url_for('main.index') }}">Back to home</a>
+  </div>
+</section>
+{% endblock %}

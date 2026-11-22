@@ -1,7 +1,7 @@
 import os
 from datetime import datetime, timezone
 
-from flask import Flask, request
+from flask import Flask, render_template, request
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import inspect, text
 
@@ -74,6 +74,24 @@ def create_app(config_class=Config):
     from app.security import init_security
 
     init_security(app)
+
+    @app.errorhandler(404)
+    def not_found(error):
+        return render_template("404.html"), 404
+
+    @app.errorhandler(400)
+    @app.errorhandler(403)
+    @app.errorhandler(429)
+    def request_error(error):
+        return (
+            render_template(
+                "error.html",
+                code=error.code,
+                title=error.name,
+                message=error.description,
+            ),
+            error.code,
+        )
 
     @app.context_processor
     def inject_account():

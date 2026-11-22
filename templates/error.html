@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block title %}{{ title }} — RemiChain{% endblock %}
+{% block description %}{{ message }}{% endblock %}
+
+{% block content %}
+<section class="error-page">
+  <p class="error-code">{{ code }}</p>
+  <h1>{{ title }}</h1>
+  <p>{{ message }}</p>
+  <div class="page-actions">
+    {% if account %}
+      <a class="btn btn-primary" href="{{ url_for('main.dashboard') }}">Go to dashboard</a>
+    {% endif %}
+    <a class="btn btn-secondary" href="{{ url_for('main.index') }}">Back to home</a>
+  </div>
+</section>
+{% endblock %}

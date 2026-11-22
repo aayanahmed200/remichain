@@ -3,43 +3,289 @@
 
 {% block content %}
 <section class="hero">
-  <h1>Connecting surplus medical supplies with those who need them most.</h1>
-  <p>
-    Clinics, pharmacies, and hospitals throw away usable medication and equipment
-    every day while nearby facilities go without. RemiChain matches surplus to need,
-    automatically, before it's too late.
-  </p>
-  <div class="cta-group">
-    <a class="btn btn-primary" href="{{ url_for('donations.donate') }}">List a Donation</a>
-    <a class="btn btn-secondary" href="{{ url_for('requests.request_supply') }}">Request Supplies</a>
+  <div class="hero-copy">
+    <span class="eyebrow">Medical supply network</span>
+    <h1>Surplus supplies, matched to need — before they expire.</h1>
+    <p class="hero-lead">
+      Clinics, pharmacies and hospitals discard usable medicine and equipment every day
+      while nearby facilities go without. RemiChain ranks every surplus box against every
+      open request and proposes the handoff that saves the most.
+    </p>
+
+    <div class="hero-actions">
+      <a class="btn btn-primary btn-lg" href="{{ url_for('donations.donate') }}">List a donation</a>
+      <a class="btn btn-ghost btn-lg" href="{{ url_for('requests.request_supply') }}">Request supplies</a>
+    </div>
+
+    <div class="hero-proof">
+      <div class="avatar-stack" aria-hidden="true">
+        {% for f in facilities[:4] %}
+          <span class="avatar">{{ f.name[0] }}</span>
+        {% endfor %}
+      </div>
+      <span>{{ stats.facilities }} verified facilities sharing one network</span>
+    </div>
+
+    <div class="hero-stat">
+      <strong>{{ stats.matches_made }}</strong>
+      <span>matches proposed<br>by the scoring engine</span>
+    </div>
+  </div>
+
+  <div class="hero-media">
+    <img src="{{ url_for('static', filename='images/hero.jpg') }}"
+         alt="Clinician holding a box of donated medical supplies">
+    <span class="chip chip-top"><span class="dot"></span> Expiry-aware matching</span>
+    <span class="chip chip-bottom">Medication · PPE · Equipment</span>
   </div>
 </section>
 
-<section class="stats-grid">
-  <div class="stat-card">
-    <span class="stat-number">{{ stats.facilities }}</span>
-    <span class="stat-label">Registered Facilities</span>
+<section class="section">
+  <div class="section-head">
+    <div>
+      <span class="eyebrow">Live network</span>
+      <h2>What is moving right now</h2>
+    </div>
+    <a class="btn btn-ghost" href="{{ url_for('main.dashboard') }}">Open the dashboard</a>
   </div>
-  <div class="stat-card">
-    <span class="stat-number">{{ stats.available_donations }}</span>
-    <span class="stat-label">Available Donations</span>
-  </div>
-  <div class="stat-card">
-    <span class="stat-number">{{ stats.open_requests }}</span>
-    <span class="stat-label">Open Requests</span>
-  </div>
-  <div class="stat-card">
-    <span class="stat-number">{{ stats.matches_made }}</span>
-    <span class="stat-label">Matches Made</span>
+
+  <div class="grid grid-4">
+    <article class="stat">
+      <span class="stat-icon" aria-hidden="true">
+        <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M4 21V8l8-5 8 5v13"/><path d="M9 21v-6h6v6"/>
+        </svg>
+      </span>
+      <span class="stat-number">{{ stats.facilities }}</span>
+      <span class="stat-label">Registered facilities</span>
+    </article>
+
+    <article class="stat">
+      <span class="stat-icon" aria-hidden="true">
+        <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="m3 8 9-5 9 5-9 5-9-5Z"/><path d="m3 13 9 5 9-5"/>
+        </svg>
+      </span>
+      <span class="stat-number">{{ stats.available_donations }}</span>
+      <span class="stat-label">Available donations</span>
+    </article>
+
+    <article class="stat">
+      <span class="stat-icon" aria-hidden="true">
+        <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="5" y="4" width="14" height="17" rx="2.5"/><path d="M9 4.5h6M9 10h6M9 14h4"/>
+        </svg>
+      </span>
+      <span class="stat-number">{{ stats.open_requests }}</span>
+      <span class="stat-label">Open requests</span>
+    </article>
+
+    <article class="stat">
+      <span class="stat-icon" aria-hidden="true">
+        <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M9 15 15 9"/><path d="M11 6.5 12.5 5a4 4 0 0 1 5.7 5.7L16.7 12"/>
+          <path d="M13 17.5 11.5 19a4 4 0 0 1-5.7-5.7L7.3 12"/>
+        </svg>
+      </span>
+      <span class="stat-number">{{ stats.matches_made }}</span>
+      <span class="stat-label">Matches proposed</span>
+    </article>
   </div>
 </section>
 
-<section class="how-it-works">
-  <h2>How it works</h2>
-  <ol>
-    <li><strong>Donate</strong> — facilities list surplus medication, PPE, or equipment before it expires or gathers dust.</li>
-    <li><strong>Request</strong> — facilities in need post what they're short on, with an urgency level.</li>
-    <li><strong>Match</strong> — the engine scores every donation against every open request by urgency, expiry, distance, and quantity fit, and proposes the best pairing.</li>
-  </ol>
+<section class="section">
+  <div class="section-head">
+    <div>
+      <span class="eyebrow">How it works</span>
+      <h2>Three steps from shelf to patient</h2>
+    </div>
+    <p>No spreadsheets, no phone chain. Post the surplus, post the need, and let the scoring engine do the introductions.</p>
+  </div>
+
+  <div class="grid grid-3">
+    <article class="card step">
+      <span class="step-num">01</span>
+      <h3>Donate</h3>
+      <p>Log surplus medicine, PPE or equipment with a quantity and an expiry date, so nothing sits forgotten in a stockroom.</p>
+    </article>
+
+    <article class="card card-accent step">
+      <span class="step-num">02</span>
+      <h3>Match</h3>
+      <p>Every open request is scored against available stock on urgency, expiry, distance and quantity fit. The best pairing wins.</p>
+    </article>
+
+    <article class="card step">
+      <span class="step-num">03</span>
+      <h3>Deliver</h3>
+      <p>The match is proposed with an exact quantity, stock is reserved, and both facilities see it on the shared dashboard.</p>
+    </article>
+  </div>
+</section>
+
+<section class="section">
+  <div class="section-head">
+    <div>
+      <span class="eyebrow">What moves</span>
+      <h2>Anything usable has a second life</h2>
+    </div>
+    <a class="btn btn-ghost" href="{{ url_for('donations.donate') }}">Add an item</a>
+  </div>
+
+  <div class="grid grid-3">
+    <article class="tile tile-accent">
+      <span class="icon" aria-hidden="true">
+        <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="3" y="8" width="18" height="13" rx="2.5"/><path d="M8 8V6a4 4 0 0 1 8 0v2"/><path d="M12 12v5M9.5 14.5h5"/>
+        </svg>
+      </span>
+      <div>
+        <h3>Medication</h3>
+        <p>Sealed stock nearing expiry, routed to facilities that can dispense it in time.</p>
+      </div>
+    </article>
+
+    <article class="tile">
+      <span class="icon" aria-hidden="true">
+        <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 3c3.5 2.2 5 5.4 5 9 0 3.3-2.2 6-5 9-2.8-3-5-5.7-5-9 0-3.6 1.5-6.8 5-9Z"/><path d="M9.5 12h5"/>
+        </svg>
+      </span>
+      <div>
+        <h3>PPE</h3>
+        <p>Masks, gloves and gowns that clear out of one store room and into a busy ward.</p>
+      </div>
+    </article>
+
+    <article class="tile">
+      <span class="icon" aria-hidden="true">
+        <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M4 7h16v10H4z"/><path d="M8 7V5h8v2M8 17v2h8v-2"/>
+        </svg>
+      </span>
+      <div>
+        <h3>Equipment</h3>
+        <p>Durable devices with no expiry date, matched on distance and quantity.</p>
+      </div>
+    </article>
+
+    <article class="tile">
+      <span class="icon" aria-hidden="true">
+        <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M6 3h9l4 4v14H6z"/><path d="M15 3v4h4M9 12h6M9 16h4"/>
+        </svg>
+      </span>
+      <div>
+        <h3>Consumables</h3>
+        <p>Gauze, syringes, tubing — the small things a clinic runs out of first.</p>
+      </div>
+    </article>
+
+    <article class="tile">
+      <span class="icon" aria-hidden="true">
+        <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="8"/><path d="M12 8v4l3 2"/>
+        </svg>
+      </span>
+      <div>
+        <h3>Expiry-aware scoring</h3>
+        <p>Stock expiring within a fortnight outranks stock that can wait months.</p>
+      </div>
+    </article>
+
+    <article class="tile">
+      <span class="icon" aria-hidden="true">
+        <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 21s7-5.6 7-11a7 7 0 1 0-14 0c0 5.4 7 11 7 11Z"/><circle cx="12" cy="10" r="2.6"/>
+        </svg>
+      </span>
+      <div>
+        <h3>Proximity ranking</h3>
+        <p>Great-circle distance between facilities keeps transport short and cheap.</p>
+      </div>
+    </article>
+  </div>
+</section>
+
+<section class="section">
+  <div class="story">
+    <img src="{{ url_for('static', filename='images/story.jpg') }}"
+         alt="Two clinicians handing over boxes of medical supplies in a clinic stockroom">
+    <div>
+      <span class="eyebrow">Why it matters</span>
+      <h2>Every handoff keeps usable care out of the waste bin.</h2>
+      <p>
+        Expired stock is a double loss: the money spent to buy it, and the treatment a patient
+        never received. RemiChain closes that gap by making the nearest good match the easiest
+        one to act on.
+      </p>
+
+      <ul class="checklist">
+        <li>
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12.5 4.5 4.5L19 7"/></svg>
+          Four scoring factors: urgency, expiry, proximity, quantity fit
+        </li>
+        <li>
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12.5 4.5 4.5L19 7"/></svg>
+          Stock is reserved the moment a match is proposed — no double promises
+        </li>
+        <li>
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12.5 4.5 4.5L19 7"/></svg>
+          Partial matches keep the remainder available for another facility
+        </li>
+        <li>
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12.5 4.5 4.5L19 7"/></svg>
+          Open JSON API for inventory, requests and matches
+        </li>
+      </ul>
+
+      <a class="btn btn-primary" href="{{ url_for('main.dashboard') }}">Explore the network</a>
+    </div>
+  </div>
+</section>
+
+{% if facilities %}
+<section class="section">
+  <div class="section-head">
+    <div>
+      <span class="eyebrow">Partner facilities</span>
+      <h2>Who is on the network</h2>
+    </div>
+    <a class="btn btn-ghost" href="{{ url_for('requests.request_supply') }}">Add a request</a>
+  </div>
+
+  <div class="grid grid-4">
+    {% for f in facilities %}
+    <article class="facility">
+      <div class="facility-top">
+        <span class="facility-avatar">{{ f.name[0] }}</span>
+        <div>
+          <h3>{{ f.name }}</h3>
+          <span class="facility-meta">{{ f.city }}, {{ f.country }}</span>
+        </div>
+      </div>
+      <div class="facility-foot">
+        <span>{{ f.facility_type|capitalize }}</span>
+        {% if f.verified %}
+          <span class="badge badge-fulfilled">Verified</span>
+        {% else %}
+          <span class="badge">Unverified</span>
+        {% endif %}
+      </div>
+    </article>
+    {% endfor %}
+  </div>
+</section>
+{% endif %}
+
+<section class="cta-band">
+  <div>
+    <h2>Have surplus on a shelf right now?</h2>
+    <p>It takes under a minute to list it — and the engine will look for a match the moment a request comes in.</p>
+  </div>
+  <div class="cta-actions">
+    <a class="btn btn-ghost btn-lg" href="{{ url_for('donations.donate') }}">List a donation</a>
+    <a class="btn btn-ghost btn-lg" href="{{ url_for('requests.request_supply') }}">Request supplies</a>
+  </div>
 </section>
 {% endblock %}

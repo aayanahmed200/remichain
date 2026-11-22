@@ -1,55 +1,99 @@
 {% extends "base.html" %}
 {% block title %}Donate Supplies — RemiChain{% endblock %}
+{% block description %}List surplus medication, PPE or equipment so the matching engine can route it to a facility that needs it.{% endblock %}
 
 {% block content %}
-<h1>List a Surplus Donation</h1>
-<form method="POST" class="form-card">
-  <label>Facility
-    <select name="facility_id" required>
-      {% for f in facilities %}
-        <option value="{{ f.id }}">{{ f.name }} — {{ f.city }}</option>
-      {% endfor %}
-    </select>
-  </label>
-
-  <label>Item name
-    <input type="text" name="item_name" placeholder="e.g. Amoxicillin 500mg" required>
-  </label>
-
-  <label>Category
-    <select name="category" required>
-      <option value="medication">Medication</option>
-      <option value="ppe">PPE</option>
-      <option value="equipment">Equipment</option>
-      <option value="consumable">Consumable</option>
-    </select>
-  </label>
-
-  <div class="form-row">
-    <label>Quantity
-      <input type="number" name="quantity" min="1" required>
-    </label>
-    <label>Unit
-      <input type="text" name="unit" value="units">
-    </label>
+<div class="page-head">
+  <div>
+    <span class="eyebrow">Give it a second life</span>
+    <h1>List a surplus donation</h1>
+    <p>Tell us what is on the shelf and when it expires. The engine will rank it against every open request.</p>
   </div>
+  <div class="page-actions">
+    <a class="btn btn-ghost" href="{{ url_for('main.dashboard') }}">View dashboard</a>
+  </div>
+</div>
 
-  <label>Expiry date (leave blank for durable equipment)
-    <input type="date" name="expiry_date">
-  </label>
+<div class="form-shell">
+  <form method="POST" class="form-card">
+    <div class="field">
+      <label for="facility_id">Donating facility</label>
+      <select name="facility_id" id="facility_id" required>
+        {% for f in facilities %}
+          <option value="{{ f.id }}">{{ f.name }} — {{ f.city }}</option>
+        {% endfor %}
+      </select>
+    </div>
 
-  <label>Condition
-    <select name="condition">
-      <option value="new">New</option>
-      <option value="like_new">Like New</option>
-      <option value="used_functional">Used, Functional</option>
-    </select>
-  </label>
+    <div class="field">
+      <label for="item_name">Item name</label>
+      <input type="text" id="item_name" name="item_name" placeholder="e.g. Amoxicillin 500mg" required>
+      <span class="field-hint">Use the same name a requester would search for — matching is name-based.</span>
+    </div>
 
-  <label>Notes
-    <textarea name="notes" rows="3" placeholder="Storage requirements, pickup availability, etc."></textarea>
-  </label>
+    <div class="field">
+      <label for="category">Category</label>
+      <select name="category" id="category" required>
+        <option value="medication">Medication</option>
+        <option value="ppe">PPE</option>
+        <option value="equipment">Equipment</option>
+        <option value="consumable">Consumable</option>
+      </select>
+    </div>
 
-  <button type="submit" class="btn btn-primary">List Donation</button>
-</form>
+    <div class="field-row">
+      <div class="field">
+        <label for="quantity">Quantity</label>
+        <input type="number" id="quantity" name="quantity" min="1" step="1" placeholder="80" required>
+      </div>
+      <div class="field">
+        <label for="unit">Unit</label>
+        <input type="text" id="unit" name="unit" value="units" placeholder="boxes">
+      </div>
+    </div>
+
+    <div class="field-row">
+      <div class="field">
+        <label for="expiry_date">Expiry date</label>
+        <input type="date" id="expiry_date" name="expiry_date">
+        <span class="field-hint">Leave blank for durable equipment.</span>
+      </div>
+      <div class="field">
+        <label for="condition">Condition</label>
+        <select name="condition" id="condition">
+          <option value="new">New</option>
+          <option value="like_new">Like new</option>
+          <option value="used_functional">Used, functional</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="field">
+      <label for="notes">Notes</label>
+      <textarea id="notes" name="notes" rows="3" placeholder="Storage requirements, pickup availability, etc."></textarea>
+    </div>
+
+    <div class="form-foot">
+      <button type="submit" class="btn btn-primary btn-lg">List donation</button>
+      <span class="field-hint">Goes live on the dashboard immediately.</span>
+    </div>
+  </form>
+
+  <aside class="aside">
+    <div class="aside-card">
+      <h2>What happens next</h2>
+      <ul class="aside-list">
+        <li><span class="num">1</span><span>Your item appears under available donations straight away.</span></li>
+        <li><span class="num">2</span><span>Requesters receive an instant match if the item names line up.</span></li>
+        <li><span class="num">3</span><span>The matching pass scores urgency, expiry, distance and quantity, then reserves the stock.</span></li>
+      </ul>
+    </div>
+
+    <div class="promo">
+      <span class="eyebrow">Expiry matters</span>
+      <h2>Stock expiring within 14 days gets priority.</h2>
+      <p>Adding an accurate expiry date pushes your donation to the top of the queue for facilities that can dispense it in time.</p>
+    </div>
+  </aside>
+</div>
 {% endblock %}

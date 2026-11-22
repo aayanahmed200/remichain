@@ -50,27 +50,40 @@ vercel deploy --prod
 
 Any push to `main` deploys as well, because the project is connected to GitHub.
 
-### Database
+### Database (Supabase)
 
 Vercel's filesystem is read-only apart from a per-instance `/tmp`, so the app
-needs a hosted Postgres database there. Add a Postgres connection string to the
-project and the app picks it up automatically — no code changes:
+runs on hosted Postgres. Connection details come from the environment — no code
+changes are needed to point it at a different database:
 
 | Variable | Used by |
 | --- | --- |
-| `DATABASE_URL` | Neon, Supabase, generic Postgres |
+| `DATABASE_URL` | Supabase, Neon, generic Postgres |
 | `POSTGRES_URL` / `POSTGRES_PRISMA_URL` | Vercel storage integrations |
 
-In the Vercel dashboard: **Storage → Create → Neon (or Supabase) → Connect to
-Project**. The integration writes the variable for you; redeploy afterwards and
-the schema is created on first boot.
+RemiChain keeps its tables in a dedicated `remichain` schema and connects as the
+`remichain_app` role, so it never touches the other tables in that project. Both
+were created with:
 
-`SECRET_KEY` (or `FLASK_SECRET_KEY`) should also be set so session cookies stay
-valid across function instances.
+```sql
+CREATE ROLE remichain_app LOGIN PASSWORD '...';
+CREATE SCHEMA remichain;
+GRANT USAGE, CREATE ON SCHEMA remichain TO remichain_app;
+ALTER ROLE remichain_app SET search_path = remichain, public;
+```
 
-Without a database the deployed site still runs, but on a throwaway SQLite file
-inside the function instance: data is not shared between instances and is lost
-when they recycle.
+The pooler connection string (session mode, port 5432) is what serverless needs:
+
+```
+postgresql://remichain_app.<project-ref>:<password>@aws-0-<region>.pooler.supabase.com:5432/postgres?sslmode=require
+```
+
+Tables and demo facilities are created on first boot. `SECRET_KEY` (or
+`FLASK_SECRET_KEY`) should also be set so session cookies stay valid across
+function instances.
+
+Without a database the app falls back to a throwaway SQLite file inside the
+function instance: fine locally, not something to rely on in production.
 
 ## Notes and limitations
 

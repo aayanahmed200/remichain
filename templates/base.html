@@ -2,34 +2,86 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>{% block title %}RemiChain{% endblock %}</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}RemiChain — Surplus medical supplies, matched to need{% endblock %}</title>
+  <meta name="description" content="{% block description %}RemiChain matches surplus medical supplies with the facilities that need them, before they expire in storage.{% endblock %}">
+  <meta name="theme-color" content="#eef2ff">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
 <body>
-  <nav class="navbar">
-    <a href="{{ url_for('main.index') }}" class="brand">RemiChain</a>
-    <div class="nav-links">
-      <a href="{{ url_for('main.dashboard') }}">Dashboard</a>
-      <a href="{{ url_for('donations.donate') }}">Donate Supplies</a>
-      <a href="{{ url_for('requests.request_supply') }}">Request Supplies</a>
+  <div class="page">
+    <div class="nav-wrap">
+      <nav class="navbar" aria-label="Primary">
+        <a class="brand" href="{{ url_for('main.index') }}">
+          <span class="brand-mark" aria-hidden="true">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round">
+              <path d="M12 5v14M5 12h14"/>
+            </svg>
+          </span>
+          <span>RemiChain</span>
+        </a>
+
+        <div class="nav-links">
+          <a href="{{ url_for('main.index') }}" class="{{ 'active' if request.path == url_for('main.index') }}">Home</a>
+          <a href="{{ url_for('main.dashboard') }}" class="{{ 'active' if request.path.startswith('/dashboard') }}">Dashboard</a>
+          <a href="{{ url_for('donations.donate') }}" class="{{ 'active' if request.path == url_for('donations.donate') }}">Donate</a>
+          <a href="{{ url_for('requests.request_supply') }}" class="{{ 'active' if request.path == url_for('requests.request_supply') }}">Request</a>
+        </div>
+
+        <div class="nav-cta">
+          <a class="btn btn-primary btn-sm" href="{{ url_for('donations.donate') }}">List a donation</a>
+        </div>
+      </nav>
     </div>
-  </nav>
 
-  <main class="container">
-    {% with messages = get_flashed_messages(with_categories=true) %}
-      {% if messages %}
-        {% for category, message in messages %}
-          <div class="flash flash-{{ category }}">{{ message }}</div>
-        {% endfor %}
-      {% endif %}
-    {% endwith %}
+    <main class="container">
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+          <div class="flashes">
+            {% for category, message in messages %}
+              <div class="flash flash-{{ category }}" role="status">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
+                  {% if category == 'error' %}
+                    <circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16.5v.5"/>
+                  {% elif category == 'success' %}
+                    <circle cx="12" cy="12" r="9"/><path d="m8.5 12.5 2.5 2.5 4.5-5"/>
+                  {% else %}
+                    <circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 7.8v.2"/>
+                  {% endif %}
+                </svg>
+                <span>{{ message }}</span>
+              </div>
+            {% endfor %}
+          </div>
+        {% endif %}
+      {% endwith %}
 
-    {% block content %}{% endblock %}
-  </main>
+      {% block content %}{% endblock %}
+    </main>
 
-  <footer>
-    <p>RemiChain &middot; Built for SDG 3: Good Health and Well-being</p>
-  </footer>
+    <footer class="footer">
+      <div class="footer-brand">
+        <span class="brand-mark brand-mark-sm" aria-hidden="true">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round">
+            <path d="M12 5v14M5 12h14"/>
+          </svg>
+        </span>
+        <div>
+          <strong>RemiChain</strong>
+          <p>Surplus medical supplies, matched to need.</p>
+        </div>
+      </div>
+      <div class="footer-links">
+        <a href="{{ url_for('main.dashboard') }}">Dashboard</a>
+        <a href="{{ url_for('donations.donate') }}">Donate supplies</a>
+        <a href="{{ url_for('requests.request_supply') }}">Request supplies</a>
+        <a href="{{ url_for('api.list_donations') }}">API</a>
+      </div>
+      <p class="footer-note">Built for SDG 3 — Good Health and Well-being.</p>
+    </footer>
+  </div>
 </body>
 </html>

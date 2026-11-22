@@ -67,9 +67,9 @@
               <span class="cell-strong">{{ m.request.facility.name if m.request.facility }}</span>
               <span class="cell-sub">{{ m.request.urgency|capitalize }} urgency</span>
             </td>
-            <td class="cell-num">{{ m.matched_quantity }}</td>
-            <td class="cell-num">{{ "%.2f"|format(m.score) }}</td>
-            <td><span class="badge badge-{{ m.status }}">{{ m.status }}</span></td>
+            <td class="cell-num" data-label="Qty">{{ m.matched_quantity }}</td>
+            <td class="cell-num" data-label="Score">{{ "%.2f"|format(m.score) }}</td>
+            <td data-label="Status"><span class="badge badge-{{ m.status }}">{{ m.status }}</span></td>
             <td>
               <div class="actions">
                 {% if m.status == 'proposed' %}
@@ -126,10 +126,10 @@
               <span class="cell-strong">{{ d.item_name }}</span>
               <span class="cell-sub">{{ d.category|capitalize }} &middot; {{ d.condition|replace('_', ' ') }}</span>
             </td>
-            <td>{{ d.facility.name if d.facility }}</td>
-            <td class="cell-num">{{ d.quantity }} {{ d.unit }}</td>
-            <td class="cell-num">{{ d.expiry_date or "—" }}</td>
-            <td><span class="badge badge-{{ d.status }}">{{ d.status }}</span></td>
+            <td data-label="Facility">{{ d.facility.name if d.facility }}</td>
+            <td class="cell-num" data-label="Quantity">{{ d.quantity }} {{ d.unit }}</td>
+            <td class="cell-num" data-label="Expires">{{ d.expiry_date or "—" }}</td>
+            <td data-label="Status"><span class="badge badge-{{ d.status }}">{{ d.status }}</span></td>
           </tr>
           {% endfor %}
         </tbody>
@@ -168,10 +168,10 @@
               <span class="cell-strong">{{ r.item_name }}</span>
               <span class="cell-sub">{{ r.category|capitalize }}</span>
             </td>
-            <td>{{ r.facility.name if r.facility }}</td>
-            <td class="cell-num">{{ r.quantity_needed }} {{ r.unit }}</td>
-            <td><span class="badge badge-urgency-{{ r.urgency }}">{{ r.urgency }}</span></td>
-            <td><span class="badge badge-{{ r.status }}">{{ r.status|replace('_', ' ') }}</span></td>
+            <td data-label="Facility">{{ r.facility.name if r.facility }}</td>
+            <td class="cell-num" data-label="Needed">{{ r.quantity_needed }} {{ r.unit }}</td>
+            <td data-label="Urgency"><span class="badge badge-urgency-{{ r.urgency }}">{{ r.urgency }}</span></td>
+            <td data-label="Status"><span class="badge badge-{{ r.status }}">{{ r.status|replace('_', ' ') }}</span></td>
           </tr>
           {% endfor %}
         </tbody>

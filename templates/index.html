@@ -44,9 +44,9 @@
                   <span class="cell-strong">{{ m.request.facility.name if m.request.facility }}</span>
                   <span class="cell-sub">{{ m.request.urgency|capitalize }} urgency</span>
                 </td>
-                <td class="cell-num">{{ m.matched_quantity }}</td>
-                <td class="cell-num">{{ "%.2f"|format(m.score) }}</td>
-                <td><span class="badge badge-{{ m.status }}">{{ m.status }}</span></td>
+                <td class="cell-num" data-label="Qty">{{ m.matched_quantity }}</td>
+                <td class="cell-num" data-label="Score">{{ "%.2f"|format(m.score) }}</td>
+                <td data-label="Status"><span class="badge badge-{{ m.status }}">{{ m.status }}</span></td>
               </tr>
               {% endfor %}
             </tbody>

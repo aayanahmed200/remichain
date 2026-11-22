@@ -622,11 +622,8 @@ table.data tbody tr:hover { background: var(--orange-50); }
 }
 
 @media (max-width: 640px) {
-  /* The console is the main feature on mobile: drop the score column rather
-     than making people scroll the table sideways. */
-  .product table.data { min-width: 0; }
-  .product table.data th:nth-child(4),
-  .product table.data td:nth-child(4) { display: none; }
+  .site-nav { gap: 0; }
+  .site-nav a { padding: 8px 10px; font-size: 0.9rem; }
 
   .section-head { flex-direction: column; align-items: flex-start; }
   .page-head { padding-top: var(--s6); }
@@ -634,6 +631,64 @@ table.data tbody tr:hover { background: var(--orange-50); }
   .field-row { grid-template-columns: 1fr; }
   .hero-actions .btn { flex: 1 1 auto; }
   .brand span { font-size: 0.98rem; }
+}
+
+/* Phones: data tables stack as rows instead of scrolling sideways. */
+
+@media (max-width: 600px) {
+  .table-scroll { overflow-x: visible; }
+
+  table.data { min-width: 0; }
+  table.data thead { display: none; }
+  table.data,
+  table.data tbody,
+  table.data tr,
+  table.data td { display: block; }
+
+  table.data tr {
+    padding: var(--s3) var(--s4);
+    border-bottom: 1px solid var(--line);
+  }
+
+  table.data tbody tr:last-child { border-bottom: 0; }
+  table.data tbody tr:hover { background: transparent; }
+
+  table.data td {
+    display: block;
+    padding: 2px 0;
+    border: 0;
+    font-size: 0.9rem;
+  }
+
+  /* Labelled cells become a label/value pair; the name cells keep their
+     own stacked title and subtitle. */
+  table.data td[data-label] {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: var(--s4);
+  }
+
+  table.data td::before {
+    content: attr(data-label);
+    flex: none;
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  table.data td:not([data-label])::before { content: none; }
+
+  table.data td:first-child { margin-bottom: 6px; }
+
+  .actions { justify-content: flex-start; }
+}
+
+@media (max-width: 420px) {
+  /* The logo already links home, so the first nav slot is spare. */
+  .site-nav a:first-child { display: none; }
 }
 
 @media (prefers-reduced-motion: reduce) {

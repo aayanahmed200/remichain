@@ -42,6 +42,9 @@ def database_uri():
 
 
 class Config:
+    # Canonical origin used for SEO tags, the sitemap and absolute links.
+    SITE_URL = os.environ.get("SITE_URL", "https://remichain.vercel.app")
+
     SECRET_KEY = (
         os.environ.get("SECRET_KEY")
         or os.environ.get("FLASK_SECRET_KEY")

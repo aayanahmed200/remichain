@@ -1,94 +1,130 @@
 {% extends "base.html" %}
-{% block title %}RemiChain — Surplus medical supplies, matched to need{% endblock %}
+{% block title %}RemiChain — move expiring hospital stock to the facility that needs it{% endblock %}
+{% block description %}Post surplus medication, PPE or equipment and RemiChain ranks it against open requests from hospitals, clinics and pharmacies by urgency, expiry date, distance and quantity fit.{% endblock %}
 
 {% block content %}
 <section class="hero">
   <div class="hero-copy">
-    <span class="eyebrow">Medical supply network</span>
-    <h1>Surplus supplies, matched to need — before they expire.</h1>
+    <h1>Move expiring stock to the facility that can still use it.</h1>
     <p class="hero-lead">
-      Clinics, pharmacies and hospitals discard usable medicine and equipment every day
-      while nearby facilities go without. RemiChain ranks every surplus box against every
-      open request and proposes the handoff that saves the most.
+      RemiChain ranks every surplus box in your stores against every open request nearby — urgency first,
+      then expiry, distance and quantity — and proposes the handoff with the exact amount to send.
     </p>
-
     <div class="hero-actions">
-      <a class="btn btn-primary btn-lg" href="{{ url_for('donations.donate') }}">List a donation</a>
-      <a class="btn btn-ghost btn-lg" href="{{ url_for('requests.request_supply') }}">Request supplies</a>
+      <a class="btn btn-primary btn-lg" href="{{ url_for('donations.donate') }}">Post surplus stock</a>
+      <a class="btn btn-secondary btn-lg" href="{{ url_for('requests.request_supply') }}">Post a request</a>
     </div>
+    <p class="hero-note">Free for hospitals, clinics, pharmacies and NGOs. No spreadsheets, no phone chain.</p>
+  </div>
 
-    <div class="hero-proof">
-      <div class="avatar-stack" aria-hidden="true">
-        {% for f in facilities[:4] %}
-          <span class="avatar">{{ f.name[0] }}</span>
-        {% endfor %}
+  <div class="product">
+    <div class="product-inner">
+      <div class="product-bar">
+        <span class="dot-set" aria-hidden="true"><i></i><i></i><i></i></span>
+        <span class="product-title">Matching console</span>
+        <span class="product-tag"><span class="num">{{ stats.matches_made }}</span> matches</span>
       </div>
-      <span>{{ stats.facilities }} verified facilities sharing one network</span>
-    </div>
 
-    <div class="hero-stat">
-      <strong>{{ stats.matches_made }}</strong>
-      <span>matches proposed<br>by the scoring engine</span>
+      <div class="product-body">
+        {% if recent_matches %}
+        <div class="table-scroll">
+          <table class="data">
+            <thead>
+              <tr>
+                <th scope="col">Surplus</th>
+                <th scope="col">Requested by</th>
+                <th scope="col">Qty</th>
+                <th scope="col">Score</th>
+                <th scope="col">Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for m in recent_matches %}
+              <tr>
+                <td>
+                  <span class="cell-strong">{{ m.donation.item_name }}</span>
+                  <span class="cell-sub">{{ m.donation.facility.city if m.donation.facility }}</span>
+                </td>
+                <td>
+                  <span class="cell-strong">{{ m.request.facility.name if m.request.facility }}</span>
+                  <span class="cell-sub">{{ m.request.urgency|capitalize }} urgency</span>
+                </td>
+                <td class="cell-num">{{ m.matched_quantity }}</td>
+                <td class="cell-num">{{ "%.2f"|format(m.score) }}</td>
+                <td><span class="badge badge-{{ m.status }}">{{ m.status }}</span></td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+        {% else %}
+        <div class="empty">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="m3 8 9-5 9 5-9 5-9-5Z"/><path d="m3 13 9 5 9-5"/>
+          </svg>
+          <strong>No matches proposed yet</strong>
+          <span>Post one donation and one request with the same item name — the engine pairs them immediately.</span>
+          <a class="btn btn-secondary btn-sm" href="{{ url_for('donations.donate') }}">Post surplus stock</a>
+        </div>
+        {% endif %}
+      </div>
     </div>
   </div>
 
-  <div class="hero-media">
-    <img src="{{ url_for('static', filename='images/hero.jpg') }}"
-         alt="Clinician holding a box of donated medical supplies">
-    <span class="chip chip-top"><span class="dot"></span> Expiry-aware matching</span>
-    <span class="chip chip-bottom">Medication · PPE · Equipment</span>
-  </div>
-</section>
-
-<section class="section">
-  <div class="section-head">
-    <div>
-      <span class="eyebrow">Live network</span>
-      <h2>What is moving right now</h2>
+  <div class="stats">
+    <div class="stat">
+      <span class="stat-value">{{ stats.facilities }}</span>
+      <span class="stat-label">Facilities on the network</span>
     </div>
-    <a class="btn btn-ghost" href="{{ url_for('main.dashboard') }}">Open the dashboard</a>
-  </div>
-
-  <div class="grid grid-4">
-    <article class="stat">
-      <span class="stat-icon" aria-hidden="true">
-        <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M4 21V8l8-5 8 5v13"/><path d="M9 21v-6h6v6"/>
-        </svg>
-      </span>
-      <span class="stat-number">{{ stats.facilities }}</span>
-      <span class="stat-label">Registered facilities</span>
-    </article>
-
-    <article class="stat">
-      <span class="stat-icon" aria-hidden="true">
-        <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="m3 8 9-5 9 5-9 5-9-5Z"/><path d="m3 13 9 5 9-5"/>
-        </svg>
-      </span>
-      <span class="stat-number">{{ stats.available_donations }}</span>
-      <span class="stat-label">Available donations</span>
-    </article>
-
-    <article class="stat">
-      <span class="stat-icon" aria-hidden="true">
-        <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <rect x="5" y="4" width="14" height="17" rx="2.5"/><path d="M9 4.5h6M9 10h6M9 14h4"/>
-        </svg>
-      </span>
-      <span class="stat-number">{{ stats.open_requests }}</span>
-      <span class="stat-label">Open requests</span>
-    </article>
-
-    <article class="stat">
-      <span class="stat-icon" aria-hidden="true">
-        <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M9 15 15 9"/><path d="M11 6.5 12.5 5a4 4 0 0 1 5.7 5.7L16.7 12"/>
-          <path d="M13 17.5 11.5 19a4 4 0 0 1-5.7-5.7L7.3 12"/>
-        </svg>
-      </span>
-      <span class="stat-number">{{ stats.matches_made }}</span>
+    <div class="stat">
+      <span class="stat-value">{{ stats.available_donations }}</span>
+      <span class="stat-label">Donations open to match</span>
+    </div>
+    <div class="stat">
+      <span class="stat-value">{{ stats.open_requests }}</span>
+      <span class="stat-label">Requests still waiting</span>
+    </div>
+    <div class="stat">
+      <span class="stat-value">{{ stats.matches_made }}</span>
       <span class="stat-label">Matches proposed</span>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="section-head">
+    <div>
+      <h2>How a match is chosen</h2>
+      <p>Four weighted factors, applied to every donation–request pair. No manual triage.</p>
+    </div>
+  </div>
+
+  <div class="grid grid-3">
+    <article class="feature">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M12 3v18"/><path d="M5 10h14"/>
+      </svg>
+      <span class="step-index">01</span>
+      <h3>Urgency decides first</h3>
+      <p>A critical request outranks a routine one before any other factor is considered.</p>
+    </article>
+
+    <article class="feature">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/>
+      </svg>
+      <span class="step-index">02</span>
+      <h3>Expiry breaks the tie</h3>
+      <p>Stock expiring within a fortnight is offered before stock that can wait months.</p>
+    </article>
+
+    <article class="feature">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M12 21s6.5-5.4 6.5-10.5a6.5 6.5 0 1 0-13 0C5.5 15.6 12 21 12 21Z"/><circle cx="12" cy="10.4" r="2.4"/>
+      </svg>
+      <span class="step-index">03</span>
+      <h3>Distance and quantity settle it</h3>
+      <p>Great-circle distance between facilities, then how much of the need the donation covers.</p>
     </article>
   </div>
 </section>
@@ -96,151 +132,48 @@
 <section class="section">
   <div class="section-head">
     <div>
-      <span class="eyebrow">How it works</span>
-      <h2>Three steps from shelf to patient</h2>
+      <h2>Built for the people holding the stock</h2>
+      <p>Whatever your role at the facility, there is one action to take.</p>
     </div>
-    <p>No spreadsheets, no phone chain. Post the surplus, post the need, and let the scoring engine do the introductions.</p>
+    <a class="btn btn-secondary" href="{{ url_for('facilities.new_facility') }}">Add your facility</a>
   </div>
 
-  <div class="grid grid-3">
-    <article class="card step">
-      <span class="step-num">01</span>
-      <h3>Donate</h3>
-      <p>Log surplus medicine, PPE or equipment with a quantity and an expiry date, so nothing sits forgotten in a stockroom.</p>
-    </article>
-
-    <article class="card card-accent step">
-      <span class="step-num">02</span>
-      <h3>Match</h3>
-      <p>Every open request is scored against available stock on urgency, expiry, distance and quantity fit. The best pairing wins.</p>
-    </article>
-
-    <article class="card step">
-      <span class="step-num">03</span>
-      <h3>Deliver</h3>
-      <p>The match is proposed with an exact quantity, stock is reserved, and both facilities see it on the shared dashboard.</p>
-    </article>
-  </div>
-</section>
-
-<section class="section">
-  <div class="section-head">
-    <div>
-      <span class="eyebrow">What moves</span>
-      <h2>Anything usable has a second life</h2>
-    </div>
-    <a class="btn btn-ghost" href="{{ url_for('donations.donate') }}">Add an item</a>
-  </div>
-
-  <div class="grid grid-3">
-    <article class="tile tile-accent">
-      <span class="icon" aria-hidden="true">
-        <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <rect x="3" y="8" width="18" height="13" rx="2.5"/><path d="M8 8V6a4 4 0 0 1 8 0v2"/><path d="M12 12v5M9.5 14.5h5"/>
-        </svg>
-      </span>
-      <div>
-        <h3>Medication</h3>
-        <p>Sealed stock nearing expiry, routed to facilities that can dispense it in time.</p>
-      </div>
-    </article>
-
-    <article class="tile">
-      <span class="icon" aria-hidden="true">
-        <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M12 3c3.5 2.2 5 5.4 5 9 0 3.3-2.2 6-5 9-2.8-3-5-5.7-5-9 0-3.6 1.5-6.8 5-9Z"/><path d="M9.5 12h5"/>
-        </svg>
-      </span>
-      <div>
-        <h3>PPE</h3>
-        <p>Masks, gloves and gowns that clear out of one store room and into a busy ward.</p>
-      </div>
-    </article>
-
-    <article class="tile">
-      <span class="icon" aria-hidden="true">
-        <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M4 7h16v10H4z"/><path d="M8 7V5h8v2M8 17v2h8v-2"/>
-        </svg>
-      </span>
-      <div>
-        <h3>Equipment</h3>
-        <p>Durable devices with no expiry date, matched on distance and quantity.</p>
-      </div>
-    </article>
-
-    <article class="tile">
-      <span class="icon" aria-hidden="true">
-        <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M6 3h9l4 4v14H6z"/><path d="M15 3v4h4M9 12h6M9 16h4"/>
-        </svg>
-      </span>
-      <div>
-        <h3>Consumables</h3>
-        <p>Gauze, syringes, tubing — the small things a clinic runs out of first.</p>
-      </div>
-    </article>
-
-    <article class="tile">
-      <span class="icon" aria-hidden="true">
-        <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <circle cx="12" cy="12" r="8"/><path d="M12 8v4l3 2"/>
-        </svg>
-      </span>
-      <div>
-        <h3>Expiry-aware scoring</h3>
-        <p>Stock expiring within a fortnight outranks stock that can wait months.</p>
-      </div>
-    </article>
-
-    <article class="tile">
-      <span class="icon" aria-hidden="true">
-        <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M12 21s7-5.6 7-11a7 7 0 1 0-14 0c0 5.4 7 11 7 11Z"/><circle cx="12" cy="10" r="2.6"/>
-        </svg>
-      </span>
-      <div>
-        <h3>Proximity ranking</h3>
-        <p>Great-circle distance between facilities keeps transport short and cheap.</p>
-      </div>
-    </article>
-  </div>
-</section>
-
-<section class="section">
-  <div class="story">
-    <img src="{{ url_for('static', filename='images/story.jpg') }}"
-         alt="Two clinicians handing over boxes of medical supplies in a clinic stockroom">
-    <div>
-      <span class="eyebrow">Why it matters</span>
-      <h2>Every handoff keeps usable care out of the waste bin.</h2>
-      <p>
-        Expired stock is a double loss: the money spent to buy it, and the treatment a patient
-        never received. RemiChain closes that gap by making the nearest good match the easiest
-        one to act on.
-      </p>
-
-      <ul class="checklist">
+  <div class="grid grid-2">
+    <article class="notes-card">
+      <h2>Stores and pharmacy</h2>
+      <ul class="notes-list">
         <li>
-          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12.5 4.5 4.5L19 7"/></svg>
-          Four scoring factors: urgency, expiry, proximity, quantity fit
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m4 12.5 5 5L20 6.5"/></svg>
+          <span>List a box with quantity, unit and expiry date in under a minute.</span>
         </li>
         <li>
-          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12.5 4.5 4.5L19 7"/></svg>
-          Stock is reserved the moment a match is proposed — no double promises
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m4 12.5 5 5L20 6.5"/></svg>
+          <span>Stock is reserved the moment a match is proposed, so nothing is promised twice.</span>
         </li>
         <li>
-          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12.5 4.5 4.5L19 7"/></svg>
-          Partial matches keep the remainder available for another facility
-        </li>
-        <li>
-          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12.5 4.5 4.5L19 7"/></svg>
-          Open JSON API for inventory, requests and matches
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m4 12.5 5 5L20 6.5"/></svg>
+          <span>Decline a match and the quantity returns to your available stock automatically.</span>
         </li>
       </ul>
+    </article>
 
-      <a class="btn btn-primary" href="{{ url_for('main.dashboard') }}">Explore the network</a>
-    </div>
+    <article class="notes-card">
+      <h2>Ward and procurement</h2>
+      <ul class="notes-list">
+        <li>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m4 12.5 5 5L20 6.5"/></svg>
+          <span>Post what you are short on with an urgency level that reflects the ward.</span>
+        </li>
+        <li>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m4 12.5 5 5L20 6.5"/></svg>
+          <span>See which facility is offering it, and the exact quantity on the table.</span>
+        </li>
+        <li>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m4 12.5 5 5L20 6.5"/></svg>
+          <span>Accept the match, then mark it complete once the handoff is done.</span>
+        </li>
+      </ul>
+    </article>
   </div>
 </section>
 
@@ -248,44 +181,53 @@
 <section class="section">
   <div class="section-head">
     <div>
-      <span class="eyebrow">Partner facilities</span>
-      <h2>Who is on the network</h2>
+      <h2>Facilities on the network</h2>
+      <p>Ranking uses each facility's coordinates, so keep the location accurate.</p>
     </div>
-    <a class="btn btn-ghost" href="{{ url_for('requests.request_supply') }}">Add a request</a>
+    <a class="btn btn-secondary" href="{{ url_for('facilities.new_facility') }}">Add your facility</a>
   </div>
 
-  <div class="grid grid-4">
-    {% for f in facilities %}
-    <article class="facility">
-      <div class="facility-top">
-        <span class="facility-avatar">{{ f.name[0] }}</span>
-        <div>
-          <h3>{{ f.name }}</h3>
-          <span class="facility-meta">{{ f.city }}, {{ f.country }}</span>
-        </div>
-      </div>
-      <div class="facility-foot">
-        <span>{{ f.facility_type|capitalize }}</span>
-        {% if f.verified %}
-          <span class="badge badge-fulfilled">Verified</span>
-        {% else %}
-          <span class="badge">Unverified</span>
-        {% endif %}
-      </div>
-    </article>
-    {% endfor %}
+  <div class="panel">
+    <div class="table-scroll">
+      <table class="data">
+        <thead>
+          <tr>
+            <th scope="col">Facility</th>
+            <th scope="col">Type</th>
+            <th scope="col">Location</th>
+            <th scope="col">Coordinates</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for f in facilities %}
+          <tr>
+            <td><span class="cell-strong">{{ f.name }}</span></td>
+            <td>{{ f.facility_type|capitalize }}</td>
+            <td>{{ f.city }}, {{ f.country }}</td>
+            <td class="cell-num">
+              {% if f.latitude is not none and f.longitude is not none %}
+                {{ "%.2f"|format(f.latitude) }}, {{ "%.2f"|format(f.longitude) }}
+              {% else %}
+                <span class="muted">Not set</span>
+              {% endif %}
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
   </div>
 </section>
 {% endif %}
 
 <section class="cta-band">
   <div>
-    <h2>Have surplus on a shelf right now?</h2>
-    <p>It takes under a minute to list it — and the engine will look for a match the moment a request comes in.</p>
+    <h2>List one box today and see who needs it.</h2>
+    <p>Adding a donation takes a minute, and the engine will pair it with the best open request the moment it exists.</p>
   </div>
-  <div class="cta-actions">
-    <a class="btn btn-ghost btn-lg" href="{{ url_for('donations.donate') }}">List a donation</a>
-    <a class="btn btn-ghost btn-lg" href="{{ url_for('requests.request_supply') }}">Request supplies</a>
+  <div class="page-actions">
+    <a class="btn btn-primary btn-lg" href="{{ url_for('donations.donate') }}">Post surplus stock</a>
+    <a class="btn btn-secondary btn-lg" href="{{ url_for('requests.request_supply') }}">Post a request</a>
   </div>
 </section>
 {% endblock %}

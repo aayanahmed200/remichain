@@ -1,9 +1,16 @@
-from flask import Blueprint, flash, redirect, render_template, url_for
+import os
+
+from flask import Blueprint, flash, redirect, render_template, send_from_directory, url_for
 
 from app.models import Facility, Match, SupplyDonation, SupplyRequest
 from app.services.matching import run_matching_pass
+from config import BASE_DIR
 
 main_bp = Blueprint("main", __name__)
+
+# Vercel serves these from public/ at the CDN; the routes keep local
+# development (and any other host) behaving the same way.
+PUBLIC_DIR = os.path.join(BASE_DIR, "public")
 
 
 def network_stats():
@@ -20,9 +27,11 @@ def network_stats():
 
 @main_bp.route("/")
 def index():
+    recent_matches = Match.query.order_by(Match.created_at.desc()).limit(4).all()
     return render_template(
         "index.html",
         stats=network_stats(),
+        recent_matches=recent_matches,
         facilities=Facility.query.order_by(Facility.name).all(),
     )
 
@@ -38,6 +47,28 @@ def dashboard():
         donations=donations,
         requests=requests_,
         matches=matches,
+    )
+
+
+@main_bp.route("/favicon.ico")
+def favicon():
+    return send_from_directory(PUBLIC_DIR, "favicon.ico", mimetype="image/vnd.microsoft.icon")
+
+
+@main_bp.route("/robots.txt")
+def robots():
+    return send_from_directory(PUBLIC_DIR, "robots.txt", mimetype="text/plain")
+
+
+@main_bp.route("/sitemap.xml")
+def sitemap():
+    return send_from_directory(PUBLIC_DIR, "sitemap.xml", mimetype="application/xml")
+
+
+@main_bp.route("/site.webmanifest")
+def manifest():
+    return send_from_directory(
+        PUBLIC_DIR, "site.webmanifest", mimetype="application/manifest+json"
     )
 
 

@@ -1,21 +1,20 @@
 {% extends "base.html" %}
-{% block title %}Donate Supplies — RemiChain{% endblock %}
-{% block description %}List surplus medication, PPE or equipment so the matching engine can route it to a facility that needs it.{% endblock %}
+{% block title %}Donate supplies — RemiChain{% endblock %}
+{% block description %}List surplus medication, PPE, equipment or consumables with quantity and expiry so RemiChain can route it to a facility that needs it.{% endblock %}
 
 {% block content %}
 <div class="page-head">
   <div>
-    <span class="eyebrow">Give it a second life</span>
-    <h1>List a surplus donation</h1>
-    <p>Tell us what is on the shelf and when it expires. The engine will rank it against every open request.</p>
+    <h1>List surplus stock</h1>
+    <p>The item name is what matching compares, so use the name a requester would use. Expiry drives priority.</p>
   </div>
   <div class="page-actions">
-    <a class="btn btn-ghost" href="{{ url_for('main.dashboard') }}">View dashboard</a>
+    <a class="btn btn-secondary" href="{{ url_for('main.dashboard') }}">View dashboard</a>
   </div>
 </div>
 
-<div class="form-shell">
-  <form method="POST" class="form-card">
+<div class="form-layout">
+  <form method="POST" class="form-card" data-busy>
     <div class="field">
       <label for="facility_id">Donating facility</label>
       <select name="facility_id" id="facility_id" required>
@@ -27,8 +26,8 @@
 
     <div class="field">
       <label for="item_name">Item name</label>
-      <input type="text" id="item_name" name="item_name" placeholder="e.g. Amoxicillin 500mg" required>
-      <span class="field-hint">Use the same name a requester would search for — matching is name-based.</span>
+      <input type="text" id="item_name" name="item_name" placeholder="Amoxicillin 500mg" required autocomplete="off">
+      <span class="hint">Match exactly, e.g. "N95 masks" not "masks".</span>
     </div>
 
     <div class="field">
@@ -44,7 +43,7 @@
     <div class="field-row">
       <div class="field">
         <label for="quantity">Quantity</label>
-        <input type="number" id="quantity" name="quantity" min="1" step="1" placeholder="80" required>
+        <input type="number" id="quantity" name="quantity" min="1" step="1" placeholder="80" required inputmode="numeric">
       </div>
       <div class="field">
         <label for="unit">Unit</label>
@@ -56,7 +55,7 @@
       <div class="field">
         <label for="expiry_date">Expiry date</label>
         <input type="date" id="expiry_date" name="expiry_date">
-        <span class="field-hint">Leave blank for durable equipment.</span>
+        <span class="hint">Leave blank for durable equipment.</span>
       </div>
       <div class="field">
         <label for="condition">Condition</label>
@@ -70,29 +69,38 @@
 
     <div class="field">
       <label for="notes">Notes</label>
-      <textarea id="notes" name="notes" rows="3" placeholder="Storage requirements, pickup availability, etc."></textarea>
+      <textarea id="notes" name="notes" rows="3" placeholder="Storage requirements, pickup window, contact person"></textarea>
     </div>
 
     <div class="form-foot">
       <button type="submit" class="btn btn-primary btn-lg">List donation</button>
-      <span class="field-hint">Goes live on the dashboard immediately.</span>
+      <span class="hint">Appears on the dashboard immediately.</span>
     </div>
   </form>
 
-  <aside class="aside">
-    <div class="aside-card">
-      <h2>What happens next</h2>
-      <ul class="aside-list">
-        <li><span class="num">1</span><span>Your item appears under available donations straight away.</span></li>
-        <li><span class="num">2</span><span>Requesters receive an instant match if the item names line up.</span></li>
-        <li><span class="num">3</span><span>The matching pass scores urgency, expiry, distance and quantity, then reserves the stock.</span></li>
+  <aside class="notes">
+    <div class="notes-card">
+      <h2>What happens to this listing</h2>
+      <ul class="notes-list">
+        <li>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m4 12.5 5 5L20 6.5"/></svg>
+          <span>It joins available stock and is scored against every open request.</span>
+        </li>
+        <li>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m4 12.5 5 5L20 6.5"/></svg>
+          <span>The matched quantity is reserved, and any remainder stays available.</span>
+        </li>
+        <li>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m4 12.5 5 5L20 6.5"/></svg>
+          <span>Declining a match returns the full quantity to your available stock.</span>
+        </li>
       </ul>
     </div>
 
-    <div class="promo">
-      <span class="eyebrow">Expiry matters</span>
-      <h2>Stock expiring within 14 days gets priority.</h2>
-      <p>Adding an accurate expiry date pushes your donation to the top of the queue for facilities that can dispense it in time.</p>
+    <div class="notes-card">
+      <h2>Not registered yet?</h2>
+      <p class="hint" style="margin-bottom: var(--s3);">Facilities need to be on the network before stock can be listed under them.</p>
+      <a class="btn btn-secondary btn-sm" href="{{ url_for('facilities.new_facility') }}">Add your facility</a>
     </div>
   </aside>
 </div>

@@ -186,3 +186,55 @@ def run_matching_pass():
                 created.append(match)
 
     return created
+
+
+MATCH_ACTIONS = {"accept": "accepted", "decline": "rejected", "complete": "completed"}
+
+
+def change_match_status(match, action):
+    """Accept, decline or complete a proposed match.
+
+    Declining releases the reserved quantity back to the donation and reopens
+    the request, so a match never permanently removes stock from the pool.
+    Returns (ok, message) for the caller to flash.
+    """
+    new_status = MATCH_ACTIONS.get(action)
+    if new_status is None:
+        return False, "Unknown match action."
+
+    if action == "accept":
+        if match.status != "proposed":
+            return False, "Only proposed matches can be accepted."
+        match.status = "accepted"
+        db.session.commit()
+        donor = match.donation.facility.name if match.donation.facility else "the donor"
+        return True, f"Match #{match.id} accepted — arrange pickup with {donor}."
+
+    if action == "complete":
+        if match.status not in ("proposed", "accepted"):
+            return False, "Only open matches can be completed."
+        match.status = "completed"
+        match.donation.status = "delivered"
+        db.session.commit()
+        return True, f"Match #{match.id} marked complete."
+
+    if action == "decline":
+        if match.status not in ("proposed", "accepted"):
+            return False, "Only open matches can be declined."
+        donation, req = match.donation, match.request
+        donation.quantity += match.matched_quantity
+        donation.status = "available"
+        match.status = "rejected"
+        still_open = any(
+            other.status in ("proposed", "accepted")
+            for other in req.matches
+            if other.id != match.id
+        )
+        req.status = "partially_fulfilled" if still_open else "open"
+        db.session.commit()
+        return True, (
+            f"Match #{match.id} declined — {match.matched_quantity} {donation.unit} "
+            "returned to available stock."
+        )
+
+    return False, "Nothing changed."

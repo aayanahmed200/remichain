@@ -10,8 +10,10 @@ Facilities can list surplus donations and submit requests. The matching service 
 
 ## Highlights
 
-- Create and manage facility donations and supply requests.
+- Register a hospital, clinic, pharmacy or NGO, with coordinates for distance ranking.
+- List surplus donations and post supply requests under that facility.
 - Rank potential matches using four scoring factors.
+- Accept, decline or complete a proposed match; declining returns the stock and reopens the request.
 - Track proposed, reserved, partially fulfilled, and fulfilled states.
 - View a dashboard and query donations, requests, and matches through a JSON API.
 - Avoid duplicate proposals when no new data has been added.
@@ -87,8 +89,9 @@ function instance: fine locally, not something to rely on in production.
 
 ## Notes and limitations
 
-This is a prototype. The current matching flow creates proposed matches; an
-accept/decline workflow is not implemented.
+Facilities self-register and are marked unverified; there is no email ownership
+check yet, and anyone can act on a match. Put authentication and per-facility
+roles in front of it before using it with real stock across organisations.
 
 ## License
 

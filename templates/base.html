@@ -3,85 +3,116 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>{% block title %}RemiChain — Surplus medical supplies, matched to need{% endblock %}</title>
-  <meta name="description" content="{% block description %}RemiChain matches surplus medical supplies with the facilities that need them, before they expire in storage.{% endblock %}">
-  <meta name="theme-color" content="#eef2ff">
+  <title>{% block title %}RemiChain — match surplus medical supplies to hospitals that need them{% endblock %}</title>
+  <meta name="description" content="{% block description %}RemiChain ranks surplus medical supplies against open hospital requests by urgency, expiry, distance and quantity, then proposes the handoff before stock expires.{% endblock %}">
+  <link rel="canonical" href="{{ canonical }}">
+
+  <meta property="og:type" content="{% block og_type %}website{% endblock %}">
+  <meta property="og:site_name" content="RemiChain">
+  <meta property="og:title" content="{{ self.title() }}">
+  <meta property="og:description" content="{{ self.description() }}">
+  <meta property="og:url" content="{{ canonical }}">
+  <meta property="og:image" content="{{ site_url }}{{ url_for('static', filename='images/og.png') }}">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="{{ self.title() }}">
+  <meta name="twitter:description" content="{{ self.description() }}">
+  <meta name="twitter:image" content="{{ site_url }}{{ url_for('static', filename='images/og.png') }}">
+
+  <meta name="theme-color" content="#c25509">
+  <link rel="icon" href="/favicon.ico" sizes="any">
+  <link rel="icon" type="image/png" href="{{ url_for('static', filename='images/icon-32.png') }}">
+  <link rel="apple-touch-icon" href="{{ url_for('static', filename='images/icon-180.png') }}">
+  <link rel="manifest" href="/site.webmanifest">
+
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+  <script src="{{ url_for('static', filename='js/app.js') }}" defer></script>
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "Organization",
+        "@id": "{{ site_url }}/#organization",
+        "name": "RemiChain",
+        "url": "{{ site_url }}/",
+        "logo": "{{ site_url }}{{ url_for('static', filename='images/icon-512.png') }}",
+        "description": "Matches surplus medical supplies with hospitals, clinics and pharmacies before the stock expires."
+      },
+      {
+        "@type": "WebSite",
+        "@id": "{{ site_url }}/#website",
+        "url": "{{ site_url }}/",
+        "name": "RemiChain",
+        "publisher": { "@id": "{{ site_url }}/#organization" },
+        "inLanguage": "en"
+      }
+    ]
+  }
+  </script>
 </head>
 <body>
-  <div class="page">
-    <div class="nav-wrap">
-      <nav class="navbar" aria-label="Primary">
-        <a class="brand" href="{{ url_for('main.index') }}">
-          <span class="brand-mark" aria-hidden="true">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round">
-              <path d="M12 5v14M5 12h14"/>
-            </svg>
-          </span>
-          <span>RemiChain</span>
-        </a>
+  <a class="skip-link" href="#main">Skip to content</a>
 
-        <div class="nav-links">
-          <a href="{{ url_for('main.index') }}" class="{{ 'active' if request.path == url_for('main.index') }}">Home</a>
-          <a href="{{ url_for('main.dashboard') }}" class="{{ 'active' if request.path.startswith('/dashboard') }}">Dashboard</a>
-          <a href="{{ url_for('donations.donate') }}" class="{{ 'active' if request.path == url_for('donations.donate') }}">Donate</a>
-          <a href="{{ url_for('requests.request_supply') }}" class="{{ 'active' if request.path == url_for('requests.request_supply') }}">Request</a>
-        </div>
+  <header class="site-header">
+    <div class="wrap">
+      <a class="brand" href="{{ url_for('main.index') }}">
+        <img src="{{ url_for('static', filename='images/logo-mark.png') }}" width="30" height="30" alt="">
+        <span>RemiChain</span>
+      </a>
 
-        <div class="nav-cta">
-          <a class="btn btn-primary btn-sm" href="{{ url_for('donations.donate') }}">List a donation</a>
-        </div>
+      <nav class="site-nav" aria-label="Primary">
+        <a href="{{ url_for('main.index') }}" {% if request.path == url_for('main.index') %}aria-current="page"{% endif %}>Home</a>
+        <a href="{{ url_for('main.dashboard') }}" {% if request.path.startswith('/dashboard') %}aria-current="page"{% endif %}>Dashboard</a>
+        <a href="{{ url_for('donations.donate') }}" {% if request.path == url_for('donations.donate') %}aria-current="page"{% endif %}>Donate</a>
+        <a href="{{ url_for('requests.request_supply') }}" {% if request.path == url_for('requests.request_supply') %}aria-current="page"{% endif %}>Request</a>
       </nav>
+
+      <a class="btn btn-primary btn-sm header-cta" href="{{ url_for('facilities.new_facility') }}">Add your facility</a>
     </div>
+  </header>
 
-    <main class="container">
-      {% with messages = get_flashed_messages(with_categories=true) %}
-        {% if messages %}
-          <div class="flashes">
-            {% for category, message in messages %}
-              <div class="flash flash-{{ category }}" role="status">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
-                  {% if category == 'error' %}
-                    <circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16.5v.5"/>
-                  {% elif category == 'success' %}
-                    <circle cx="12" cy="12" r="9"/><path d="m8.5 12.5 2.5 2.5 4.5-5"/>
-                  {% else %}
-                    <circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 7.8v.2"/>
-                  {% endif %}
-                </svg>
-                <span>{{ message }}</span>
-              </div>
-            {% endfor %}
-          </div>
-        {% endif %}
-      {% endwith %}
-
-      {% block content %}{% endblock %}
-    </main>
-
-    <footer class="footer">
-      <div class="footer-brand">
-        <span class="brand-mark brand-mark-sm" aria-hidden="true">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round">
-            <path d="M12 5v14M5 12h14"/>
-          </svg>
-        </span>
-        <div>
-          <strong>RemiChain</strong>
-          <p>Surplus medical supplies, matched to need.</p>
+  <main id="main" class="wrap">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        <div class="flashes" role="status" aria-live="polite">
+          {% for category, message in messages %}
+            <div class="flash flash-{{ category }}" data-flash>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                {% if category == 'error' %}
+                  <circle cx="12" cy="12" r="9"/><path d="M12 8v5"/><path d="M12 16.2v.3"/>
+                {% elif category == 'success' %}
+                  <circle cx="12" cy="12" r="9"/><path d="m8.4 12.4 2.5 2.5 4.7-5"/>
+                {% else %}
+                  <circle cx="12" cy="12" r="9"/><path d="M12 11.2v5"/><path d="M12 7.8v.3"/>
+                {% endif %}
+              </svg>
+              <span>{{ message }}</span>
+            </div>
+          {% endfor %}
         </div>
-      </div>
-      <div class="footer-links">
+      {% endif %}
+    {% endwith %}
+
+    {% block content %}{% endblock %}
+  </main>
+
+  <footer class="site-footer">
+    <div class="wrap">
+      <p>&copy; {{ year }} RemiChain. Surplus medical supplies, matched before they expire.</p>
+      <nav aria-label="Footer">
         <a href="{{ url_for('main.dashboard') }}">Dashboard</a>
+        <a href="{{ url_for('facilities.new_facility') }}">Add facility</a>
         <a href="{{ url_for('donations.donate') }}">Donate supplies</a>
         <a href="{{ url_for('requests.request_supply') }}">Request supplies</a>
         <a href="{{ url_for('api.list_donations') }}">API</a>
-      </div>
-      <p class="footer-note">Built for SDG 3 — Good Health and Well-being.</p>
-    </footer>
-  </div>
+      </nav>
+    </div>
+  </footer>
 </body>
 </html>

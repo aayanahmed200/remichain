@@ -1,0 +1,14 @@
+{
+  "name": "RemiChain — surplus medical supply matching",
+  "short_name": "RemiChain",
+  "description": "Matches surplus medical supplies with the hospitals, clinics and pharmacies that need them before the stock expires.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#fffbf7",
+  "theme_color": "#c25509",
+  "icons": [
+    { "src": "/static/images/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/static/images/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" }
+  ]
+}

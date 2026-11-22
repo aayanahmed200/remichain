@@ -1,6 +1,7 @@
 import os
+from datetime import datetime, timezone
 
-from flask import Flask
+from flask import Flask, request
 from flask_sqlalchemy import SQLAlchemy
 
 from config import BASE_DIR, Config
@@ -27,12 +28,25 @@ def create_app(config_class=Config):
     from app.routes.main import main_bp
     from app.routes.donations import donations_bp
     from app.routes.requests import requests_bp
+    from app.routes.facilities import facilities_bp
+    from app.routes.matches import matches_bp
     from app.routes.api import api_bp
 
     app.register_blueprint(main_bp)
     app.register_blueprint(donations_bp)
     app.register_blueprint(requests_bp)
+    app.register_blueprint(facilities_bp)
+    app.register_blueprint(matches_bp)
     app.register_blueprint(api_bp, url_prefix="/api")
+
+    @app.context_processor
+    def inject_site_meta():
+        site_url = app.config.get("SITE_URL", "https://remichain.vercel.app").rstrip("/")
+        return {
+            "site_url": site_url,
+            "canonical": site_url + request.path,
+            "year": datetime.now(timezone.utc).year,
+        }
 
     with app.app_context():
         try:

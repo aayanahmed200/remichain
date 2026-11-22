@@ -1,21 +1,20 @@
 {% extends "base.html" %}
-{% block title %}Request Supplies — RemiChain{% endblock %}
-{% block description %}Post what your facility is short on and RemiChain will look for a surplus donation that covers it.{% endblock %}
+{% block title %}Request supplies — RemiChain{% endblock %}
+{% block description %}Post what your ward or department is short on and RemiChain will match it against surplus stock held by nearby facilities.{% endblock %}
 
 {% block content %}
 <div class="page-head">
   <div>
-    <span class="eyebrow">Short on stock?</span>
     <h1>Request supplies</h1>
-    <p>Post what you need and how urgently. A match is proposed the moment surplus stock lines up.</p>
+    <p>Urgency carries the most weight in the score. Requests can be filled by more than one donation.</p>
   </div>
   <div class="page-actions">
-    <a class="btn btn-ghost" href="{{ url_for('main.dashboard') }}">View dashboard</a>
+    <a class="btn btn-secondary" href="{{ url_for('main.dashboard') }}">View dashboard</a>
   </div>
 </div>
 
-<div class="form-shell">
-  <form method="POST" class="form-card">
+<div class="form-layout">
+  <form method="POST" class="form-card" data-busy>
     <div class="field">
       <label for="facility_id">Requesting facility</label>
       <select name="facility_id" id="facility_id" required>
@@ -27,8 +26,8 @@
 
     <div class="field">
       <label for="item_name">Item needed</label>
-      <input type="text" id="item_name" name="item_name" placeholder="e.g. Amoxicillin 500mg" required>
-      <span class="field-hint">Matching compares item names, so keep the spelling consistent.</span>
+      <input type="text" id="item_name" name="item_name" placeholder="Amoxicillin 500mg" required autocomplete="off">
+      <span class="hint">Matching compares item names, so keep the spelling consistent.</span>
     </div>
 
     <div class="field">
@@ -44,7 +43,7 @@
     <div class="field-row">
       <div class="field">
         <label for="quantity_needed">Quantity needed</label>
-        <input type="number" id="quantity_needed" name="quantity_needed" min="1" step="1" placeholder="50" required>
+        <input type="number" id="quantity_needed" name="quantity_needed" min="1" step="1" placeholder="50" required inputmode="numeric">
       </div>
       <div class="field">
         <label for="unit">Unit</label>
@@ -55,40 +54,46 @@
     <div class="field">
       <label for="urgency">Urgency</label>
       <select name="urgency" id="urgency">
-        <option value="low">Low</option>
-        <option value="medium" selected>Medium</option>
-        <option value="high">High</option>
-        <option value="critical">Critical</option>
+        <option value="low">Low — next restock cycle</option>
+        <option value="medium" selected>Medium — this week</option>
+        <option value="high">High — within days</option>
+        <option value="critical">Critical — patient care at risk</option>
       </select>
-      <span class="field-hint">Urgency carries the heaviest weight in the match score.</span>
     </div>
 
     <div class="field">
       <label for="notes">Notes</label>
-      <textarea id="notes" name="notes" rows="3" placeholder="Ward, delivery window, anything useful"></textarea>
+      <textarea id="notes" name="notes" rows="3" placeholder="Ward, delivery window, receiving contact"></textarea>
     </div>
 
     <div class="form-foot">
       <button type="submit" class="btn btn-primary btn-lg">Post request</button>
-      <span class="field-hint">You will see the best available match immediately.</span>
+      <span class="hint">You will see the best match straight away.</span>
     </div>
   </form>
 
-  <aside class="aside">
-    <div class="aside-card">
-      <h2>How the score works</h2>
-      <ul class="aside-list">
-        <li><span class="num">1</span><span><strong>Urgency</strong> — critical requests outrank routine ones.</span></li>
-        <li><span class="num">2</span><span><strong>Expiry</strong> — stock about to expire is routed first.</span></li>
-        <li><span class="num">3</span><span><strong>Distance</strong> — the nearest donating facility wins ties.</span></li>
-        <li><span class="num">4</span><span><strong>Quantity fit</strong> — donations that cover the need rank higher.</span></li>
+  <aside class="notes">
+    <div class="notes-card">
+      <h2>How the score is built</h2>
+      <ul class="notes-list">
+        <li>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m4 12.5 5 5L20 6.5"/></svg>
+          <span>Urgency is weighted heaviest, then how soon the stock expires.</span>
+        </li>
+        <li>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m4 12.5 5 5L20 6.5"/></svg>
+          <span>Distance between facilities decides when scores are close.</span>
+        </li>
+        <li>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m4 12.5 5 5L20 6.5"/></svg>
+          <span>Quantity fit ranks donations that cover more of the need higher.</span>
+        </li>
       </ul>
     </div>
 
-    <div class="promo">
-      <span class="eyebrow">Partial is fine</span>
-      <h2>Half a box today beats a full box next month.</h2>
-      <p>Requests can be covered by several donations. Whatever is left over stays open, so a second facility can top it up.</p>
+    <div class="notes-card">
+      <h2>Partial fulfilment is normal</h2>
+      <p class="hint">A request stays open until its whole quantity is covered, so several donations can top it up over time.</p>
     </div>
   </aside>
 </div>

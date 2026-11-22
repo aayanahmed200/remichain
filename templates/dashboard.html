@@ -1,81 +1,46 @@
 {% extends "base.html" %}
 {% block title %}Dashboard — RemiChain{% endblock %}
-{% block description %}Every surplus listing, open request and proposed match across the RemiChain network.{% endblock %}
+{% block description %}Review proposed matches between surplus stock and open requests, accept or decline them, and track what is still available across the network.{% endblock %}
 
 {% block content %}
 <div class="page-head">
   <div>
-    <span class="eyebrow">Operations</span>
-    <h1>Network dashboard</h1>
-    <p>Every surplus listing, open request and proposed match in one place.</p>
+    <h1>Dashboard</h1>
+    <p>Matches, surplus stock and open requests across the network. Accepting a match tells the other facility you can take the stock.</p>
   </div>
   <div class="page-actions">
-    <form method="POST" action="{{ url_for('main.run_matching') }}" class="inline-form">
-      <button type="submit" class="btn btn-primary">
-        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-          <path d="M9 15 15 9"/><path d="M11 6.5 12.5 5a4 4 0 0 1 5.7 5.7L16.7 12"/>
-          <path d="M13 17.5 11.5 19a4 4 0 0 1-5.7-5.7L7.3 12"/>
-        </svg>
-        Run matching pass
-      </button>
+    <form class="inline-form" method="POST" action="{{ url_for('main.run_matching') }}" data-busy>
+      <button type="submit" class="btn btn-primary">Run matching pass</button>
     </form>
-    <a class="btn btn-ghost" href="{{ url_for('donations.donate') }}">New donation</a>
-    <a class="btn btn-ghost" href="{{ url_for('requests.request_supply') }}">New request</a>
+    <a class="btn btn-secondary" href="{{ url_for('donations.donate') }}">New donation</a>
+    <a class="btn btn-secondary" href="{{ url_for('requests.request_supply') }}">New request</a>
   </div>
 </div>
 
-<div class="grid grid-4">
-  <article class="stat">
-    <span class="stat-icon" aria-hidden="true">
-      <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M4 21V8l8-5 8 5v13"/><path d="M9 21v-6h6v6"/>
-      </svg>
-    </span>
-    <span class="stat-number">{{ stats.facilities }}</span>
-    <span class="stat-label">Registered facilities</span>
-  </article>
-
-  <article class="stat">
-    <span class="stat-icon" aria-hidden="true">
-      <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <path d="m3 8 9-5 9 5-9 5-9-5Z"/><path d="m3 13 9 5 9-5"/>
-      </svg>
-    </span>
-    <span class="stat-number">{{ stats.available_donations }}</span>
-    <span class="stat-label">Available donations</span>
-  </article>
-
-  <article class="stat">
-    <span class="stat-icon" aria-hidden="true">
-      <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <rect x="5" y="4" width="14" height="17" rx="2.5"/><path d="M9 4.5h6M9 10h6M9 14h4"/>
-      </svg>
-    </span>
-    <span class="stat-number">{{ stats.open_requests }}</span>
-    <span class="stat-label">Open requests</span>
-  </article>
-
-  <article class="stat">
-    <span class="stat-icon" aria-hidden="true">
-      <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M9 15 15 9"/><path d="M11 6.5 12.5 5a4 4 0 0 1 5.7 5.7L16.7 12"/>
-        <path d="M13 17.5 11.5 19a4 4 0 0 1-5.7-5.7L7.3 12"/>
-      </svg>
-    </span>
-    <span class="stat-number">{{ stats.matches_made }}</span>
+<div class="stats">
+  <div class="stat">
+    <span class="stat-value">{{ stats.facilities }}</span>
+    <span class="stat-label">Facilities on the network</span>
+  </div>
+  <div class="stat">
+    <span class="stat-value">{{ stats.available_donations }}</span>
+    <span class="stat-label">Donations open to match</span>
+  </div>
+  <div class="stat">
+    <span class="stat-value">{{ stats.open_requests }}</span>
+    <span class="stat-label">Requests still waiting</span>
+  </div>
+  <div class="stat">
+    <span class="stat-value">{{ stats.matches_made }}</span>
     <span class="stat-label">Matches proposed</span>
-  </article>
+  </div>
 </div>
 
-<div class="stack" style="margin-top: 22px;">
-
+<div class="section" style="padding-top: var(--s6);">
   <section class="panel">
     <div class="panel-head">
-      <div>
-        <h2>Recent matches</h2>
-        <span class="hint">Proposed handoffs, newest first</span>
-      </div>
-      <span class="count-pill">{{ matches|length }}</span>
+      <h2>Matches</h2>
+      <span class="count"><span class="num">{{ matches|length }}</span> shown</span>
     </div>
 
     {% if matches %}
@@ -83,11 +48,12 @@
       <table class="data">
         <thead>
           <tr>
-            <th>Donation</th>
-            <th>Request</th>
-            <th>Matched qty</th>
-            <th>Score</th>
-            <th>Status</th>
+            <th scope="col">Surplus</th>
+            <th scope="col">Requested by</th>
+            <th scope="col">Qty</th>
+            <th scope="col">Score</th>
+            <th scope="col">Status</th>
+            <th scope="col"><span class="muted">Actions</span></th>
           </tr>
         </thead>
         <tbody>
@@ -98,39 +64,51 @@
               <span class="cell-sub">{{ m.donation.facility.name if m.donation.facility }} · #{{ m.donation.id }}</span>
             </td>
             <td>
-              <span class="cell-strong">{{ m.request.item_name }}</span>
-              <span class="cell-sub">{{ m.request.facility.name if m.request.facility }} · #{{ m.request.id }}</span>
+              <span class="cell-strong">{{ m.request.facility.name if m.request.facility }}</span>
+              <span class="cell-sub">{{ m.request.urgency|capitalize }} urgency · #{{ m.request.id }}</span>
             </td>
-            <td class="cell-mono">{{ m.matched_quantity }}</td>
-            <td class="cell-mono">{{ "%.2f"|format(m.score) }}</td>
+            <td class="cell-num">{{ m.matched_quantity }}</td>
+            <td class="cell-num">{{ "%.2f"|format(m.score) }}</td>
             <td><span class="badge badge-{{ m.status }}">{{ m.status }}</span></td>
+            <td>
+              <div class="actions">
+                {% if m.status == 'proposed' %}
+                  <form class="inline-form" method="POST" action="{{ url_for('matches.set_status', match_id=m.id, action='accept') }}" data-busy>
+                    <button class="btn btn-secondary btn-sm" type="submit">Accept</button>
+                  </form>
+                  <form class="inline-form" method="POST" action="{{ url_for('matches.set_status', match_id=m.id, action='decline') }}" data-busy>
+                    <button class="btn btn-quiet btn-sm" type="submit">Decline</button>
+                  </form>
+                {% elif m.status == 'accepted' %}
+                  <form class="inline-form" method="POST" action="{{ url_for('matches.set_status', match_id=m.id, action='complete') }}" data-busy>
+                    <button class="btn btn-secondary btn-sm" type="submit">Mark complete</button>
+                  </form>
+                {% else %}
+                  <span class="muted">No action</span>
+                {% endif %}
+              </div>
+            </td>
           </tr>
           {% endfor %}
         </tbody>
       </table>
     </div>
     {% else %}
-    <div class="empty-state">
-      <span class="empty-icon" aria-hidden="true">
-        <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M9 15 15 9"/><path d="M11 6.5 12.5 5a4 4 0 0 1 5.7 5.7L16.7 12"/>
-          <path d="M13 17.5 11.5 19a4 4 0 0 1-5.7-5.7L7.3 12"/>
-        </svg>
-      </span>
+    <div class="empty">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M9 15 15 9"/><path d="M11 6.5 12.5 5a4 4 0 0 1 5.7 5.7L16.7 12"/><path d="M13 17.5 11.5 19a4 4 0 0 1-5.7-5.7L7.3 12"/>
+      </svg>
       <strong>No matches yet</strong>
-      <span>List a donation or post a request — a match is proposed automatically when the two line up.</span>
-      <a class="btn btn-primary btn-sm" href="{{ url_for('donations.donate') }}">List a donation</a>
+      <span>A match is proposed as soon as an available donation and a waiting request share the same item name.</span>
+      <a class="btn btn-primary btn-sm" href="{{ url_for('donations.donate') }}">Post surplus stock</a>
     </div>
     {% endif %}
   </section>
 
   <section class="panel">
     <div class="panel-head">
-      <div>
-        <h2>Available donations</h2>
-        <span class="hint">Surplus stock still open to matching</span>
-      </div>
-      <span class="count-pill">{{ donations|length }}</span>
+      <h2>Available donations</h2>
+      <span class="count"><span class="num">{{ donations|length }}</span> shown</span>
     </div>
 
     {% if donations %}
@@ -138,11 +116,11 @@
       <table class="data">
         <thead>
           <tr>
-            <th>Item</th>
-            <th>Facility</th>
-            <th>Quantity</th>
-            <th>Expiry</th>
-            <th>Status</th>
+            <th scope="col">Item</th>
+            <th scope="col">Facility</th>
+            <th scope="col">Quantity</th>
+            <th scope="col">Expires</th>
+            <th scope="col">Status</th>
           </tr>
         </thead>
         <tbody>
@@ -152,9 +130,9 @@
               <span class="cell-strong">{{ d.item_name }}</span>
               <span class="cell-sub">{{ d.category|capitalize }} · {{ d.condition|replace('_', ' ') }}</span>
             </td>
-            <td>{{ d.facility.name if d.facility else "—" }}</td>
-            <td class="cell-mono">{{ d.quantity }} {{ d.unit }}</td>
-            <td class="cell-mono">{{ d.expiry_date or "—" }}</td>
+            <td>{{ d.facility.name if d.facility }}</td>
+            <td class="cell-num">{{ d.quantity }} {{ d.unit }}</td>
+            <td class="cell-num">{{ d.expiry_date or "—" }}</td>
             <td><span class="badge badge-{{ d.status }}">{{ d.status }}</span></td>
           </tr>
           {% endfor %}
@@ -162,26 +140,21 @@
       </table>
     </div>
     {% else %}
-    <div class="empty-state">
-      <span class="empty-icon" aria-hidden="true">
-        <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="m3 8 9-5 9 5-9 5-9-5Z"/><path d="m3 13 9 5 9-5"/>
-        </svg>
-      </span>
-      <strong>No donations listed yet</strong>
-      <span>Add the surplus sitting in your stockroom — it only takes a minute.</span>
-      <a class="btn btn-primary btn-sm" href="{{ url_for('donations.donate') }}">List a donation</a>
+    <div class="empty">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="m3 8 9-5 9 5-9 5-9-5Z"/><path d="m3 13 9 5 9-5"/>
+      </svg>
+      <strong>No stock listed</strong>
+      <span>Add the surplus sitting in your store room so it can be matched.</span>
+      <a class="btn btn-primary btn-sm" href="{{ url_for('donations.donate') }}">Post surplus stock</a>
     </div>
     {% endif %}
   </section>
 
   <section class="panel">
     <div class="panel-head">
-      <div>
-        <h2>Open requests</h2>
-        <span class="hint">Facilities waiting on supplies</span>
-      </div>
-      <span class="count-pill">{{ requests|length }}</span>
+      <h2>Open requests</h2>
+      <span class="count"><span class="num">{{ requests|length }}</span> shown</span>
     </div>
 
     {% if requests %}
@@ -189,11 +162,11 @@
       <table class="data">
         <thead>
           <tr>
-            <th>Item</th>
-            <th>Facility</th>
-            <th>Needed</th>
-            <th>Urgency</th>
-            <th>Status</th>
+            <th scope="col">Item</th>
+            <th scope="col">Facility</th>
+            <th scope="col">Needed</th>
+            <th scope="col">Urgency</th>
+            <th scope="col">Status</th>
           </tr>
         </thead>
         <tbody>
@@ -203,8 +176,8 @@
               <span class="cell-strong">{{ r.item_name }}</span>
               <span class="cell-sub">{{ r.category|capitalize }}</span>
             </td>
-            <td>{{ r.facility.name if r.facility else "—" }}</td>
-            <td class="cell-mono">{{ r.quantity_needed }} {{ r.unit }}</td>
+            <td>{{ r.facility.name if r.facility }}</td>
+            <td class="cell-num">{{ r.quantity_needed }} {{ r.unit }}</td>
             <td><span class="badge badge-urgency-{{ r.urgency }}">{{ r.urgency }}</span></td>
             <td><span class="badge badge-{{ r.status }}">{{ r.status|replace('_', ' ') }}</span></td>
           </tr>
@@ -213,18 +186,15 @@
       </table>
     </div>
     {% else %}
-    <div class="empty-state">
-      <span class="empty-icon" aria-hidden="true">
-        <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <rect x="5" y="4" width="14" height="17" rx="2.5"/><path d="M9 4.5h6M9 10h6M9 14h4"/>
-        </svg>
-      </span>
-      <strong>No requests posted yet</strong>
+    <div class="empty">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <rect x="5" y="4" width="14" height="17" rx="2.5"/><path d="M9 4.5h6"/><path d="M9 10h6"/><path d="M9 14h4"/>
+      </svg>
+      <strong>No requests posted</strong>
       <span>Say what you are short on and the engine will look for surplus stock.</span>
       <a class="btn btn-primary btn-sm" href="{{ url_for('requests.request_supply') }}">Post a request</a>
     </div>
     {% endif %}
   </section>
-
 </div>
 {% endblock %}

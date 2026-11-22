@@ -6,7 +6,7 @@
 <div class="page-head">
   <div>
     <h1>Dashboard</h1>
-    <p>Matches, stock and requests across the network.</p>
+    <p>Matches, stock and requests for {{ facility.name }}.</p>
   </div>
   <div class="page-actions">
     <form class="inline-form" method="POST" action="{{ url_for('main.run_matching') }}" data-busy>
@@ -96,14 +96,17 @@
     {% else %}
     <div class="empty">
       <strong>No matches yet</strong>
-      <span>Post a donation and a request with the same item name.</span>
+      <span>Post stock or a request with the same item name, then run a matching pass.</span>
+      <form class="inline-form" method="POST" action="{{ url_for('main.run_matching') }}" data-busy>
+        <button type="submit" class="btn btn-primary btn-sm">Run matching pass</button>
+      </form>
     </div>
     {% endif %}
   </section>
 
   <section class="panel">
     <div class="panel-head">
-      <h2>Available donations</h2>
+      <h2>Your stock</h2>
       <span class="count"><span class="num">{{ donations|length }}</span></span>
     </div>
 
@@ -138,6 +141,7 @@
     {% else %}
     <div class="empty">
       <strong>No stock listed</strong>
+      <span>Anything you list here is what the matching pass searches.</span>
       <a class="btn btn-primary btn-sm" href="{{ url_for('donations.donate') }}">Post surplus stock</a>
     </div>
     {% endif %}
@@ -145,7 +149,7 @@
 
   <section class="panel">
     <div class="panel-head">
-      <h2>Open requests</h2>
+      <h2>Your requests</h2>
       <span class="count"><span class="num">{{ requests|length }}</span></span>
     </div>
 
@@ -180,6 +184,7 @@
     {% else %}
     <div class="empty">
       <strong>No requests posted</strong>
+      <span>Requests you post here are matched against surplus stock across the network.</span>
       <a class="btn btn-primary btn-sm" href="{{ url_for('requests.request_supply') }}">Post a request</a>
     </div>
     {% endif %}

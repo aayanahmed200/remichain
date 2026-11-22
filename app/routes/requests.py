@@ -1,34 +1,36 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash
 
 from app import db
-from app.models import SupplyRequest, Facility
+from app.auth import current_facility, login_required
+from app.models import SupplyRequest
 from app.services.matching import find_matches_for_request, create_match
 
 requests_bp = Blueprint("requests", __name__)
 
 
 @requests_bp.route("/request", methods=["GET", "POST"])
+@login_required
 def request_supply():
-    facilities = Facility.query.order_by(Facility.name).all()
+    facility = current_facility()
 
     if request.method == "POST":
         try:
-            facility_id = int(request.form["facility_id"])
             quantity_needed = int(request.form["quantity_needed"])
             item_name = request.form["item_name"].strip()
             category = request.form["category"].strip()
             if not item_name or not category or quantity_needed < 1:
                 raise ValueError("missing or invalid field")
         except (KeyError, ValueError):
-            flash("Please choose a facility, enter an item name and category, and enter quantity needed as a whole number of at least 1.", "error")
-            return render_template("request.html", facilities=facilities), 400
-
-        if Facility.query.get(facility_id) is None:
-            flash("That facility could not be found — please choose one from the list.", "error")
-            return render_template("request.html", facilities=facilities), 400
+            flash(
+                "Please enter an item name and category, and enter quantity needed as a whole number of at least 1.",
+                "error",
+            )
+            return render_template("request.html", facility=facility), 400
 
         need = SupplyRequest(
-            facility_id=facility_id,
+            # Always the signed-in facility: the request belongs to the account
+            # that will accept or decline whatever gets matched to it.
+            facility_id=facility.id,
             item_name=item_name,
             category=category,
             quantity_needed=quantity_needed,
@@ -50,4 +52,4 @@ def request_supply():
 
         return redirect(url_for("main.dashboard"))
 
-    return render_template("request.html", facilities=facilities)
+    return render_template("request.html", facility=facility)

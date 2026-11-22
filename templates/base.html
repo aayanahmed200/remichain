@@ -73,7 +73,16 @@
         <a href="{{ url_for('requests.request_supply') }}" {% if request.path == url_for('requests.request_supply') %}aria-current="page"{% endif %}>Request</a>
       </nav>
 
-      <a class="btn btn-primary btn-sm header-cta" href="{{ url_for('facilities.new_facility') }}">Add your facility</a>
+      <div class="header-account">
+        {% if account %}
+          <span class="account-name" title="{{ account.name }}">{{ account.name }}</span>
+          <form class="inline-form" method="POST" action="{{ url_for('auth.logout') }}">
+            <button class="btn btn-quiet btn-sm" type="submit">Sign out</button>
+          </form>
+        {% else %}
+          <a class="btn btn-primary btn-sm" href="{{ url_for('auth.login') }}">Sign in</a>
+        {% endif %}
+      </div>
     </div>
   </header>
 
@@ -107,7 +116,10 @@
       <p>&copy; {{ year }} RemiChain. Surplus medical supplies, matched before they expire.</p>
       <nav aria-label="Footer">
         <a href="{{ url_for('main.dashboard') }}">Dashboard</a>
-        <a href="{{ url_for('facilities.new_facility') }}">Add facility</a>
+        {% if not account %}
+          <a href="{{ url_for('auth.login') }}">Sign in</a>
+          <a href="{{ url_for('facilities.new_facility') }}">Add facility</a>
+        {% endif %}
         <a href="{{ url_for('donations.donate') }}">Donate supplies</a>
         <a href="{{ url_for('requests.request_supply') }}">Request supplies</a>
         <a href="{{ url_for('api.list_donations') }}">API</a>

@@ -1,5 +1,6 @@
 import os
 import tempfile
+from datetime import timedelta
 
 BASE_DIR = os.path.abspath(os.path.dirname(__file__))
 
@@ -55,6 +56,16 @@ class Config:
     # Serverless functions are frozen between requests, so pooled connections
     # can go stale or be dropped by the provider while the instance sleeps.
     SQLALCHEMY_ENGINE_OPTIONS = {"pool_pre_ping": True, "pool_recycle": 180}
+
+    # Facility accounts. The cookie carries the signed-in facility id only;
+    # ownership is always re-checked against the database.
+    SESSION_COOKIE_NAME = "remichain_session"
+    SESSION_COOKIE_HTTPONLY = True
+    SESSION_COOKIE_SAMESITE = "Lax"
+    # Vercel terminates TLS, so the session cookie is https-only there; local
+    # development over plain http must stay usable.
+    SESSION_COOKIE_SECURE = bool(os.environ.get("VERCEL"))
+    PERMANENT_SESSION_LIFETIME = timedelta(days=14)
 
     # Matching engine tuning
     URGENCY_WEIGHT = 3.0

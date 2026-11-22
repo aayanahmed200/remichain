@@ -185,7 +185,25 @@ img { max-width: 100%; }
 .site-nav a:hover { color: var(--ink); background: var(--orange-50); }
 .site-nav a[aria-current="page"] { color: var(--orange-700); background: var(--orange-100); }
 
-.header-cta { margin-left: var(--s3); }
+.header-account {
+  display: flex;
+  align-items: center;
+  gap: var(--s2);
+  margin-left: var(--s3);
+  flex-shrink: 0;
+}
+
+.header-account .account-name {
+  max-width: 18ch;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: var(--ink-2);
+}
+
+.header-account form { display: flex; }
 
 /* ---------- Buttons ---------- */
 
@@ -530,6 +548,22 @@ table.data tbody tr:hover { background: var(--orange-50); }
 }
 
 .field-row { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--s3); }
+
+.field-static {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  flex-wrap: wrap;
+  padding: 11px 13px;
+  border: 1px solid var(--line);
+  border-radius: var(--r-1);
+  background: var(--orange-50);
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.field-static .muted { font-size: 0.85rem; font-weight: 500; }
 .hint { font-size: 0.82rem; color: var(--muted); }
 
 .form-foot {

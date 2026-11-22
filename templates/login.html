@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block title %}Sign in — RemiChain{% endblock %}
+{% block description %}Sign in to the facility account that owns your stock, requests and matches.{% endblock %}
+
+{% block content %}
+<div class="page-head">
+  <div>
+    <h1>Sign in</h1>
+    <p>Use the email your facility registered with.</p>
+  </div>
+</div>
+
+<div class="form-layout single">
+  <form method="POST" class="form-card" data-busy>
+    <input type="hidden" name="next" value="{{ next }}">
+
+    <div class="field">
+      <label for="email">Email</label>
+      <input type="email" id="email" name="email" value="{{ form.get('email', '') }}" placeholder="supplies@facility.org" required autocomplete="email">
+    </div>
+
+    <div class="field">
+      <label for="password">Password</label>
+      <input type="password" id="password" name="password" required autocomplete="current-password">
+    </div>
+
+    <div class="form-foot">
+      <button type="submit" class="btn btn-primary btn-lg">Sign in</button>
+      <a class="btn btn-quiet" href="{{ url_for('facilities.new_facility') }}">Register a facility</a>
+    </div>
+
+    <p class="hint">On the network before accounts existed? <a href="{{ url_for('auth.claim') }}">Claim your facility</a>.</p>
+  </form>
+</div>
+{% endblock %}

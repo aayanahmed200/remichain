@@ -84,9 +84,17 @@ def score_pair(donation: SupplyDonation, req: SupplyRequest, cfg) -> float:
     )
 
 
-def find_matches_for_request(req: SupplyRequest, limit=5):
-    """Return the best-scoring available donations for a given request."""
-    candidates = SupplyDonation.query.filter_by(status="available").all()
+def find_matches_for_request(req: SupplyRequest, limit=5, donation_facility_id=None):
+    """Return the best-scoring available donations for a given request.
+
+    `donation_facility_id` narrows the donor pool to one facility's stock, which
+    is what a signed-in facility's "run matching" button does: it only ever
+    proposes pairings from its own surplus.
+    """
+    query = SupplyDonation.query.filter_by(status="available")
+    if donation_facility_id is not None:
+        query = query.filter(SupplyDonation.facility_id == donation_facility_id)
+    candidates = query.all()
     cfg = current_app.config
     scored = [(d, score_pair(d, req, cfg)) for d in candidates]
     scored = [(d, s) for d, s in scored if s > 0]
@@ -162,8 +170,12 @@ def create_match(donation: SupplyDonation, req: SupplyRequest, score: float):
     return match
 
 
-def run_matching_pass():
+def run_matching_pass(donor_facility_id=None):
     """Batch job: scan every open request and propose the best match, if any.
+
+    Pass `donor_facility_id` to match only one facility's surplus (the scoped
+    dashboard pass); leave it None for the network-wide pass.
+
 
     Safe to call repeatedly (re-triggered by a user, retried, or run on a
     schedule): requests are only selected here while still "open" or
@@ -178,7 +190,7 @@ def run_matching_pass():
     ).all()
 
     for req in open_requests:
-        best = find_matches_for_request(req, limit=1)
+        best = find_matches_for_request(req, limit=1, donation_facility_id=donor_facility_id)
         if best:
             donation, score = best[0]
             match = create_match(donation, req, score)

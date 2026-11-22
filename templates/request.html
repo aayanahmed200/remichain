@@ -13,13 +13,9 @@
 <div class="form-layout single">
   <form method="POST" class="form-card" data-busy>
     <div class="field">
-      <label for="facility_id">Facility</label>
-      <select name="facility_id" id="facility_id" required>
-        {% for f in facilities %}
-          <option value="{{ f.id }}">{{ f.name }} — {{ f.city }}</option>
-        {% endfor %}
-      </select>
-      <span class="hint">Not listed? <a href="{{ url_for('facilities.new_facility') }}">Add your facility</a>.</span>
+      <label>Facility</label>
+      <p class="field-static">{{ facility.name }}<span class="muted">{{ facility.city }}, {{ facility.country }}</span></p>
+      <span class="hint">The request is posted under your signed-in facility.</span>
     </div>
 
     <div class="field">

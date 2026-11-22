@@ -6,7 +6,7 @@
 <div class="page-head">
   <div>
     <h1>Add your facility</h1>
-    <p>Coordinates are optional, and they rank the closest match first.</p>
+    <p>Coordinates are optional, and they rank the closest match first. You will be signed in after registering.</p>
   </div>
 </div>
 
@@ -38,8 +38,20 @@
     </div>
 
     <div class="field">
-      <label for="contact_email">Contact email</label>
-      <input type="email" id="contact_email" name="contact_email" value="{{ form.get('contact_email', '') }}" placeholder="supplies@facility.org" autocomplete="email">
+      <label for="contact_email">Email</label>
+      <input type="email" id="contact_email" name="contact_email" value="{{ form.get('contact_email', '') }}" placeholder="supplies@facility.org" required autocomplete="email">
+      <span class="hint">This is the address you will sign in with.</span>
+    </div>
+
+    <div class="field-row">
+      <div class="field">
+        <label for="password">Password</label>
+        <input type="password" id="password" name="password" minlength="8" required autocomplete="new-password">
+      </div>
+      <div class="field">
+        <label for="password_confirm">Confirm password</label>
+        <input type="password" id="password_confirm" name="password_confirm" minlength="8" required autocomplete="new-password">
+      </div>
     </div>
 
     <div class="field-row">

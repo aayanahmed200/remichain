@@ -1,7 +1,9 @@
 from flask import Blueprint, flash, redirect, render_template, request, url_for
 
 from app import db
+from app.auth import current_facility, login_facility
 from app.models import Facility
+from app.routes.auth import _password_problem, _valid_email
 
 facilities_bp = Blueprint("facilities", __name__)
 
@@ -30,7 +32,9 @@ def new_facility():
         city = request.form.get("city", "").strip()
         country = request.form.get("country", "").strip()
         facility_type = request.form.get("facility_type", "hospital").strip().lower()
-        email = request.form.get("contact_email", "").strip()
+        email = request.form.get("contact_email", "").strip().lower()
+        password = request.form.get("password", "")
+        confirm = request.form.get("password_confirm", "")
 
         errors = []
         if not name:
@@ -41,8 +45,14 @@ def new_facility():
             errors.append("Country is required.")
         if facility_type not in FACILITY_TYPES:
             facility_type = "hospital"
-        if email and ("@" not in email or "." not in email.rsplit("@", 1)[-1]):
-            errors.append("Enter a valid contact email, for example supplies@facility.org.")
+        if not _valid_email(email):
+            errors.append("Enter the email that will sign in to this facility, for example supplies@facility.org.")
+        problem = _password_problem(password, confirm)
+        if problem:
+            errors.append(problem)
+
+        if not errors and Facility.query.filter(db.func.lower(Facility.contact_email) == email).first():
+            errors.append("A facility already signs in with that email. Sign in instead, or use another address.")
 
         latitude = _coordinate(request.form.get("latitude"), "Latitude", -90, 90, errors)
         longitude = _coordinate(request.form.get("longitude"), "Longitude", -180, 180, errors)
@@ -59,13 +69,17 @@ def new_facility():
             country=country,
             latitude=latitude,
             longitude=longitude,
-            contact_email=email or None,
+            contact_email=email,
             verified=False,
         )
+        facility.set_password(password)
         db.session.add(facility)
         db.session.commit()
 
-        flash(f"{facility.name} is now on the network — you can list stock under it.", "success")
+        # Registering is signing up: the facility lands straight in its own
+        # dashboard rather than having to sign in again.
+        login_facility(facility)
+        flash(f"{facility.name} is now on the network — list your surplus stock.", "success")
         return redirect(url_for("main.dashboard"))
 
     return render_template("facility_new.html", types=FACILITY_TYPES, form={})

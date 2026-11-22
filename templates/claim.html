@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+{% block title %}Claim your facility — RemiChain{% endblock %}
+{% block description %}Set a sign-in email and password for a facility that is already listed on the RemiChain network.{% endblock %}
+
+{% block content %}
+<div class="page-head">
+  <div>
+    <h1>Claim your facility</h1>
+    <p>For facilities that were on the network before accounts existed.</p>
+  </div>
+</div>
+
+<div class="form-layout single">
+  <form method="POST" class="form-card" data-busy>
+    <div class="field">
+      <label for="name">Facility name</label>
+      <input type="text" id="name" name="name" value="{{ form.get('name', '') }}" placeholder="Jinnah Community Clinic" required autocomplete="organization">
+      <span class="hint">Must match the name on the network list.</span>
+    </div>
+
+    <div class="field">
+      <label for="city">City</label>
+      <input type="text" id="city" name="city" value="{{ form.get('city', '') }}" placeholder="Lahore" required autocomplete="address-level2">
+    </div>
+
+    <div class="field">
+      <label for="email">Sign-in email</label>
+      <input type="email" id="email" name="email" value="{{ form.get('email', '') }}" placeholder="supplies@facility.org" required autocomplete="email">
+    </div>
+
+    <div class="field-row">
+      <div class="field">
+        <label for="password">Password</label>
+        <input type="password" id="password" name="password" minlength="8" required autocomplete="new-password">
+      </div>
+      <div class="field">
+        <label for="password_confirm">Confirm password</label>
+        <input type="password" id="password_confirm" name="password_confirm" minlength="8" required autocomplete="new-password">
+      </div>
+    </div>
+
+    <div class="form-foot">
+      <button type="submit" class="btn btn-primary btn-lg">Claim facility</button>
+      <a class="btn btn-quiet" href="{{ url_for('auth.login') }}">Back to sign in</a>
+    </div>
+
+    <p class="hint">Only facilities without an account can be claimed. Registering a new facility instead? <a href="{{ url_for('facilities.new_facility') }}">Add it</a>.</p>
+  </form>
+</div>
+{% endblock %}

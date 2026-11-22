@@ -1,19 +1,16 @@
 {% extends "base.html" %}
 {% block title %}Add your facility — RemiChain{% endblock %}
-{% block description %}Register your hospital, clinic, pharmacy or NGO so it can list surplus stock, post requests and be matched with nearby facilities. Coordinates are used for distance-based matching.{% endblock %}
+{% block description %}Register your hospital, clinic, pharmacy or NGO so it can list surplus stock, post requests and be matched with nearby facilities.{% endblock %}
 
 {% block content %}
 <div class="page-head">
   <div>
     <h1>Add your facility</h1>
-    <p>Registration takes one form. Coordinates are optional but they are what lets the engine rank the closest match first.</p>
-  </div>
-  <div class="page-actions">
-    <a class="btn btn-secondary" href="{{ url_for('main.dashboard') }}">View dashboard</a>
+    <p>Coordinates are optional, and they rank the closest match first.</p>
   </div>
 </div>
 
-<div class="form-layout">
+<div class="form-layout single">
   <form method="POST" class="form-card" data-busy>
     <div class="field">
       <label for="name">Facility name</label>
@@ -21,7 +18,7 @@
     </div>
 
     <div class="field">
-      <label for="facility_type">Facility type</label>
+      <label for="facility_type">Type</label>
       <select name="facility_type" id="facility_type">
         {% for t in types %}
           <option value="{{ t }}" {% if form.get('facility_type') == t %}selected{% endif %}>{{ t|capitalize }}</option>
@@ -43,7 +40,6 @@
     <div class="field">
       <label for="contact_email">Contact email</label>
       <input type="email" id="contact_email" name="contact_email" value="{{ form.get('contact_email', '') }}" placeholder="supplies@facility.org" autocomplete="email">
-      <span class="hint">Optional. Used by the other facility to arrange the handoff.</span>
     </div>
 
     <div class="field-row">
@@ -56,37 +52,10 @@
         <input type="text" id="longitude" name="longitude" value="{{ form.get('longitude', '') }}" placeholder="74.3436" inputmode="decimal">
       </div>
     </div>
-    <span class="hint">Decimal degrees. Without coordinates a facility gets a neutral distance score.</span>
 
     <div class="form-foot">
       <button type="submit" class="btn btn-primary btn-lg">Register facility</button>
-      <span class="hint">You can list stock immediately after.</span>
     </div>
   </form>
-
-  <aside class="notes">
-    <div class="notes-card">
-      <h2>What registration unlocks</h2>
-      <ul class="notes-list">
-        <li>
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m4 12.5 5 5L20 6.5"/></svg>
-          <span>List surplus stock under your facility name.</span>
-        </li>
-        <li>
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m4 12.5 5 5L20 6.5"/></svg>
-          <span>Post requests your wards are short on.</span>
-        </li>
-        <li>
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m4 12.5 5 5L20 6.5"/></svg>
-          <span>Appear in distance ranking for nearby facilities.</span>
-        </li>
-      </ul>
-    </div>
-
-    <div class="notes-card">
-      <h2>Finding your coordinates</h2>
-      <p class="hint">Right-click your location in Google Maps, then copy the pair of numbers. Latitudes are positive to the north, longitudes positive to the east.</p>
-    </div>
-  </aside>
 </div>
 {% endblock %}

@@ -10,3 +10,4 @@ instance/
 .DS_Store
 *.egg-info/
 .snapshots/
+.vercel/

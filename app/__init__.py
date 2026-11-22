@@ -1,13 +1,25 @@
+import os
+
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 
-from config import Config
+from config import BASE_DIR, Config
 
 db = SQLAlchemy()
 
+TEMPLATE_DIR = os.path.join(BASE_DIR, "templates")
+# Static files are served by Vercel's CDN from public/ in production and by
+# Flask from the same directory during local development.
+STATIC_DIR = os.path.join(BASE_DIR, "public", "static")
+
 
 def create_app(config_class=Config):
-    app = Flask(__name__, template_folder="../templates", static_folder="../static")
+    app = Flask(
+        __name__,
+        template_folder=TEMPLATE_DIR,
+        static_folder=STATIC_DIR,
+        static_url_path="/static",
+    )
     app.config.from_object(config_class)
 
     db.init_app(app)
@@ -23,8 +35,12 @@ def create_app(config_class=Config):
     app.register_blueprint(api_bp, url_prefix="/api")
 
     with app.app_context():
-        db.create_all()
-        from app.services.seed import seed_facilities
-        seed_facilities()
+        try:
+            db.create_all()
+            from app.services.seed import seed_facilities
+            seed_facilities()
+        except Exception:  # noqa: BLE001 - a cold start must not crash the site
+            db.session.rollback()
+            app.logger.exception("Could not initialise the database")
 
     return app

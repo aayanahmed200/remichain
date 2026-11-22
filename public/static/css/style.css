@@ -295,12 +295,20 @@ a { color: var(--brand); }
 .avatar:nth-child(3) { background: linear-gradient(140deg, #f97316, #ec4899); }
 .avatar:nth-child(4) { background: linear-gradient(140deg, #10b981, #0ea5e9); }
 
-.hero-media { position: relative; z-index: 2; }
+.hero-media {
+  position: relative;
+  z-index: 2;
+  align-self: stretch;
+  display: flex;
+  align-items: center;
+}
 
 .hero-media img {
   display: block;
   width: 100%;
-  max-height: 470px;
+  height: 100%;
+  min-height: 320px;
+  max-height: 560px;
   object-fit: cover;
   object-position: center 12%;
   border-radius: 28px;
@@ -628,8 +636,6 @@ a { color: var(--brand); }
   box-shadow: var(--shadow-sm);
   overflow: hidden;
 }
-
-.panel + .panel { margin-top: 20px; }
 
 .panel-head {
   display: flex;

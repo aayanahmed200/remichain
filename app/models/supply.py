@@ -19,7 +19,11 @@ class SupplyDonation(db.Model):
     expiry_date = db.Column(db.Date, nullable=True)  # null for durable equipment
     condition = db.Column(db.String(30), default="new")  # new, like_new, used_functional
 
-    status = db.Column(db.String(20), default="available")  # available, reserved, delivered
+    # available, reserved, delivered, expired
+    status = db.Column(db.String(20), default="available")
+    # Set by the scheduled sweep when the expiry date passes; shown to the
+    # donor so stock is flagged rather than silently dropped from matching.
+    expired_flagged_at = db.Column(db.DateTime, nullable=True)
     notes = db.Column(db.Text, nullable=True)
 
     created_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
@@ -35,4 +39,7 @@ class SupplyDonation(db.Model):
             "expiry_date": self.expiry_date.isoformat() if self.expiry_date else None,
             "condition": self.condition,
             "status": self.status,
+            "expired_flagged_at": (
+                self.expired_flagged_at.isoformat() if self.expired_flagged_at else None
+            ),
         }

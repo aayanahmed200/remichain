@@ -68,8 +68,22 @@ def index():
 def dashboard():
     facility = current_facility()
     donations = (
-        SupplyDonation.query.filter_by(facility_id=facility.id)
+        SupplyDonation.query.filter(
+            SupplyDonation.facility_id == facility.id,
+            SupplyDonation.status != "expired",
+        )
         .order_by(SupplyDonation.created_at.desc())
+        .limit(20)
+        .all()
+    )
+    # Stock the scheduled sweep pulled out because it expired, newest flag
+    # first, so the donor sees it instead of it quietly disappearing.
+    flagged = (
+        SupplyDonation.query.filter(
+            SupplyDonation.facility_id == facility.id,
+            SupplyDonation.status == "expired",
+        )
+        .order_by(SupplyDonation.expired_flagged_at.desc())
         .limit(20)
         .all()
     )
@@ -85,6 +99,7 @@ def dashboard():
         facility=facility,
         stats=facility_stats(facility),
         donations=donations,
+        flagged=flagged,
         requests=requests_,
         matches=matches,
     )

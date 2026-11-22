@@ -15,21 +15,33 @@ TEMPLATE_DIR = os.path.join(BASE_DIR, "templates")
 STATIC_DIR = os.path.join(BASE_DIR, "public", "static")
 
 
-def _ensure_facility_credentials_column():
-    """Add facilities.password_hash to a database created before accounts existed.
+# Columns added after the tables first shipped. `db.create_all()` only creates
+# missing tables, so an existing database has to be altered in place.
+ADDED_COLUMNS = {
+    "facilities": {"password_hash": "VARCHAR(255)"},
+    "supply_donations": {"expired_flagged_at": "TIMESTAMP"},
+}
 
-    `db.create_all()` only creates missing tables, so a database that already
-    has `facilities` would never gain the new column. The check-then-ALTER runs
-    on both SQLite (local) and Postgres (Vercel + Supabase).
+
+def _ensure_schema_columns():
+    """Add any columns a database predating them is missing.
+
+The check-then-ALTER runs on both SQLite (local) and Postgres (Vercel +
+    Supabase). Existing rows get NULL, which every reader treats as "not set".
     """
     inspector = inspect(db.engine)
-    if "facilities" not in inspector.get_table_names():
-        return
-    columns = {column["name"] for column in inspector.get_columns("facilities")}
-    if "password_hash" in columns:
-        return
-    with db.engine.begin() as connection:
-        connection.execute(text("ALTER TABLE facilities ADD COLUMN password_hash VARCHAR(255)"))
+    tables = set(inspector.get_table_names())
+
+    for table, columns in ADDED_COLUMNS.items():
+        if table not in tables:
+            continue
+        existing = {column["name"] for column in inspector.get_columns(table)}
+        missing = {name: ddl for name, ddl in columns.items() if name not in existing}
+        if not missing:
+            continue
+        with db.engine.begin() as connection:
+            for name, ddl in missing.items():
+                connection.execute(text(f"ALTER TABLE {table} ADD COLUMN {name} {ddl}"))
 
 
 def create_app(config_class=Config):
@@ -77,7 +89,7 @@ def create_app(config_class=Config):
     with app.app_context():
         try:
             db.create_all()
-            _ensure_facility_credentials_column()
+            _ensure_schema_columns()
             from app.services.seed import seed_facilities
             seed_facilities()
         except Exception:  # noqa: BLE001 - a cold start must not crash the site

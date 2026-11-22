@@ -5,5 +5,11 @@
       "includeFiles": "{templates/**,public/**}",
       "maxDuration": 30
     }
-  }
+  },
+  "crons": [
+    {
+      "path": "/api/cron/maintenance",
+      "schedule": "0 4 * * *"
+    }
+  ]
 }

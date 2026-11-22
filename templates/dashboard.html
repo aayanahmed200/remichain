@@ -36,6 +36,41 @@
   </div>
 </div>
 
+{% if flagged %}
+<section class="panel panel-flag">
+  <div class="panel-head">
+    <h2>Expired stock</h2>
+    <span class="count"><span class="num">{{ flagged|length }}</span></span>
+  </div>
+  <p class="panel-note">The nightly sweep flagged these because the expiry date has passed. They are out of matching until you dispose of them or list a fresh batch.</p>
+  <div class="table-scroll">
+    <table class="data">
+      <thead>
+        <tr>
+          <th scope="col">Item</th>
+          <th scope="col">Quantity</th>
+          <th scope="col">Expired</th>
+          <th scope="col">Flagged</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for d in flagged %}
+        <tr>
+          <td>
+            <span class="cell-strong">{{ d.item_name }}</span>
+            <span class="cell-sub">{{ d.category|capitalize }} &middot; {{ d.condition|replace('_', ' ') }}</span>
+          </td>
+          <td class="cell-num" data-label="Quantity">{{ d.quantity }} {{ d.unit }}</td>
+          <td class="cell-num" data-label="Expired">{{ d.expiry_date }}</td>
+          <td data-label="Flagged"><span class="badge badge-expired">{{ d.expired_flagged_at.strftime('%d %b %H:%M') if d.expired_flagged_at else 'expired' }}</span></td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+{% endif %}
+
 <div class="section section-flush">
   <section class="panel">
     <div class="panel-head">

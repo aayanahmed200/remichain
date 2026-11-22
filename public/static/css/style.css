@@ -375,6 +375,15 @@ img { max-width: 100%; }
 
 .panel + .panel { margin-top: var(--s5); }
 
+.panel-flag { border-color: #f5c6c1; }
+
+.panel-note {
+  padding: var(--s4) var(--s5);
+  max-width: 78ch;
+  font-size: 0.9rem;
+  color: var(--muted);
+}
+
 .panel-head {
   display: flex;
   align-items: center;
@@ -450,7 +459,7 @@ table.data tbody tr:hover { background: var(--orange-50); }
 .badge-accepted { color: var(--teal-500); background: var(--teal-50); border-color: #bfe3de; }
 .badge-fulfilled, .badge-completed, .badge-delivered { color: var(--green-700); background: var(--green-50); border-color: #bfe6d2; }
 .badge-reserved, .badge-partially_fulfilled { color: var(--amber-700); background: var(--amber-50); border-color: #efd9a4; }
-.badge-rejected { color: var(--red-700); background: var(--red-50); border-color: #f5c6c1; }
+.badge-rejected, .badge-expired { color: var(--red-700); background: var(--red-50); border-color: #f5c6c1; }
 .badge-urgency-critical { color: var(--red-700); background: var(--red-50); border-color: #f5c6c1; }
 .badge-urgency-high { color: var(--amber-700); background: var(--amber-50); border-color: #efd9a4; }
 .badge-urgency-medium { color: var(--ink-2); background: var(--surface-2); }

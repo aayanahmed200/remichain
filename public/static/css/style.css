@@ -1006,6 +1006,128 @@ main.wrap {
   color: var(--muted);
 }
 
+/* ---------- Custom dropdown ---------- */
+
+.select { position: relative; }
+
+/* The native control stays for the form and for assistive tech; the button
+   below is what people see and click. */
+.select select {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.select-button {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 11px 13px;
+  font-family: inherit;
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: var(--ink);
+  text-align: left;
+  background: var(--surface);
+  border: 1px solid var(--line-2);
+  border-radius: var(--r-1);
+  cursor: pointer;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.select-button:hover { border-color: var(--orange-300); }
+
+.select-button[aria-expanded="true"] {
+  border-color: var(--orange-500);
+  box-shadow: 0 0 0 3px var(--orange-100);
+}
+
+.select-value {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.select-chevron {
+  flex: none;
+  color: var(--muted);
+  transition: transform 0.18s ease, color 0.15s ease;
+}
+
+.select-button[aria-expanded="true"] .select-chevron {
+  transform: rotate(180deg);
+  color: var(--orange-600);
+}
+
+.select-list {
+  position: absolute;
+  z-index: 30;
+  top: calc(100% + 6px);
+  left: 0;
+  right: 0;
+  max-height: 264px;
+  margin: 0;
+  padding: 6px;
+  list-style: none;
+  overflow-y: auto;
+  background: var(--surface);
+  border: 1px solid var(--line-2);
+  border-radius: var(--r-2);
+  box-shadow: var(--shadow-2);
+  animation: select-in 0.12s ease-out both;
+}
+
+.select-list[hidden] { display: none; }
+.select-list--up { top: auto; bottom: calc(100% + 6px); }
+
+@keyframes select-in {
+  from { opacity: 0; transform: translateY(-4px); }
+  to { opacity: 1; transform: none; }
+}
+
+.select-option {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 10px;
+  border-radius: var(--r-1);
+  font-size: 0.93rem;
+  color: var(--body);
+  cursor: pointer;
+}
+
+.select-option:hover,
+.select-option:focus {
+  background: var(--orange-50);
+  color: var(--ink);
+  outline: none;
+}
+
+.select-option[aria-selected="true"] {
+  background: var(--orange-50);
+  color: var(--orange-700);
+  font-weight: 700;
+}
+
+.select-option[aria-disabled="true"] {
+  color: var(--muted);
+  cursor: not-allowed;
+}
+
+.select-tick {
+  margin-left: auto;
+  flex: none;
+  opacity: 0;
+  color: var(--orange-600);
+}
+
+.select-option[aria-selected="true"] .select-tick { opacity: 1; }
+
 /* Wide screens: the headline and the live matches share the first screen
    instead of stacking, which left half the viewport empty. */
 @media (min-width: 1080px) {

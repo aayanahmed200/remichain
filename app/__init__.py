@@ -123,9 +123,24 @@ def create_app(config_class=Config):
         version = app.extensions.get("asset_version")
         if version is None:
             digest = hashlib.sha1()
-            for name in ("css/style.css", "js/app.js"):
+            # Icons are in here on purpose: browsers keep a favicon in a cache
+            # of their own that outlives normal revalidation and is keyed by
+            # URL, so replacing the file behind /favicon.ico is not enough —
+            # the URL has to change for the new mark to appear.
+            assets = [
+                os.path.join(STATIC_DIR, "css/style.css"),
+                os.path.join(STATIC_DIR, "js/app.js"),
+                os.path.join(STATIC_DIR, "images/logo-mark.png"),
+                os.path.join(STATIC_DIR, "images/icon-32.png"),
+                os.path.join(STATIC_DIR, "images/icon-180.png"),
+                os.path.join(STATIC_DIR, "images/icon-192.png"),
+                os.path.join(STATIC_DIR, "images/icon-512.png"),
+                os.path.join(STATIC_DIR, "images/og.png"),
+                os.path.join(BASE_DIR, "public", "favicon.ico"),
+            ]
+            for path in assets:
                 try:
-                    with open(os.path.join(STATIC_DIR, name), "rb") as asset:
+                    with open(path, "rb") as asset:
                         digest.update(asset.read())
                 except OSError:
                     continue

@@ -1,5 +1,14 @@
 User-agent: *
 Allow: /
+
+# Signed-in pages: a crawler only ever sees the redirect to sign-in.
+Disallow: /dashboard
+Disallow: /donate
+Disallow: /request
+Disallow: /matches/
+Disallow: /logout
+
+# Raw JSON. The readable /api reference page stays crawlable.
 Disallow: /api/
 
 Sitemap: https://remichain.vercel.app/sitemap.xml

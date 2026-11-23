@@ -6,6 +6,7 @@
   <title>{% block title %}RemiChain — match surplus medical supplies to hospitals that need them{% endblock %}</title>
   <meta name="description" content="{% block description %}RemiChain ranks surplus medical supplies against open hospital requests by urgency, expiry, distance and quantity, then proposes the handoff before stock expires.{% endblock %}">
   <link rel="canonical" href="{{ canonical }}">
+  <meta name="robots" content="{% block robots %}index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1{% endblock %}">
 
   <meta property="og:type" content="{% block og_type %}website{% endblock %}">
   <meta property="og:site_name" content="RemiChain">
@@ -13,16 +14,20 @@
   <meta property="og:description" content="{{ self.description() }}">
   <meta property="og:url" content="{{ canonical }}">
   <meta property="og:image" content="{{ site_url }}{{ url_for('static', filename='images/og.png') }}">
+  <meta property="og:image:type" content="image/png">
+  <meta property="og:image:alt" content="RemiChain logo beside the wordmark on a warm cream card">
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="{{ self.title() }}">
   <meta name="twitter:description" content="{{ self.description() }}">
   <meta name="twitter:image" content="{{ site_url }}{{ url_for('static', filename='images/og.png') }}">
+  <meta name="twitter:image:alt" content="RemiChain logo beside the wordmark on a warm cream card">
 
   <meta name="theme-color" content="#c25509">
   <link rel="icon" href="/favicon.ico" sizes="any">
-  <link rel="icon" type="image/png" href="{{ url_for('static', filename='images/icon-32.png') }}">
+  <link rel="icon" type="image/png" sizes="32x32" href="{{ url_for('static', filename='images/icon-32.png') }}">
+  <link rel="icon" type="image/png" sizes="192x192" href="{{ url_for('static', filename='images/icon-192.png') }}">
   <link rel="apple-touch-icon" href="{{ url_for('static', filename='images/icon-180.png') }}">
   <link rel="manifest" href="/site.webmanifest">
 
@@ -41,7 +46,13 @@
         "@id": "{{ site_url }}/#organization",
         "name": "RemiChain",
         "url": "{{ site_url }}/",
-        "logo": "{{ site_url }}{{ url_for('static', filename='images/icon-512.png') }}",
+        "logo": {
+          "@type": "ImageObject",
+          "url": "{{ site_url }}{{ url_for('static', filename='images/icon-512.png') }}",
+          "width": 512,
+          "height": 512
+        },
+        "image": "{{ site_url }}{{ url_for('static', filename='images/og.png') }}",
         "description": "Matches surplus medical supplies with hospitals, clinics and pharmacies before the stock expires."
       },
       {

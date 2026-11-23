@@ -11,3 +11,12 @@ instance/
 *.egg-info/
 .snapshots/
 .vercel/
+
+# Secrets: never commit local environment files
+.env
+.env.*
+!.env.example
+
+# Scratch output from local QA runs
+shots/
+.cloud-attachments/

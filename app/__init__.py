@@ -1,3 +1,4 @@
+import hashlib
 import os
 from datetime import datetime, timezone
 
@@ -113,17 +114,24 @@ def create_app(config_class=Config):
         """Cache-bust style.css and app.js.
 
         Both files keep a stable name, so a browser that cached them during an
-        earlier deployment keeps showing that stylesheet until it expires —
-        which looks like the site forgetting a redesign. Deriving the query
-        string from the files' own mtime changes the URL whenever they change.
+        earlier deployment keeps painting that stylesheet until it expires —
+        which reads as the site forgetting a redesign. The query string is a
+        hash of the files' contents rather than their mtime: Vercel normalises
+        mtimes during a build, so every deploy would otherwise produce the
+        same version and never invalidate anything.
         """
-        stamp = 0
-        for name in ("css/style.css", "js/app.js"):
-            try:
-                stamp = max(stamp, int(os.path.getmtime(os.path.join(STATIC_DIR, name))))
-            except OSError:
-                continue
-        return {"asset_version": stamp}
+        version = app.extensions.get("asset_version")
+        if version is None:
+            digest = hashlib.sha1()
+            for name in ("css/style.css", "js/app.js"):
+                try:
+                    with open(os.path.join(STATIC_DIR, name), "rb") as asset:
+                        digest.update(asset.read())
+                except OSError:
+                    continue
+            version = digest.hexdigest()[:10]
+            app.extensions["asset_version"] = version
+        return {"asset_version": version}
 
     with app.app_context():
         try:

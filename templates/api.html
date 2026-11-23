@@ -1,0 +1,86 @@
+{% extends "base.html" %}
+{% block title %}API — RemiChain{% endblock %}
+{% block description %}Read the RemiChain network as JSON: the item catalogue, surplus stock, open requests, proposed matches and the matching endpoints.{% endblock %}
+
+{% block content %}
+<div class="page-head">
+  <div>
+    <h1>API</h1>
+    <p>The same data the site reads, as JSON. No key needed for the read endpoints.</p>
+  </div>
+  <div class="page-actions">
+    <a class="btn btn-secondary btn-sm" href="{{ url_for('api.list_catalogue') }}">Try /api/catalogue</a>
+  </div>
+</div>
+
+<section class="section section-flush">
+  <div class="panel panel-flat">
+    <div class="panel-head">
+      <h2>Read endpoints</h2>
+      <span class="count">JSON</span>
+    </div>
+    <div class="table-scroll">
+      <table class="data">
+        <thead>
+          <tr>
+            <th scope="col">Endpoint</th>
+            <th scope="col">Returns</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><span class="endpoint"><span class="method">GET</span>/api/catalogue</span></td>
+            <td class="api-returns">Canonical item names, their aliases and pack sizes</td>
+          </tr>
+          <tr>
+            <td><span class="endpoint"><span class="method">GET</span>/api/donations</span></td>
+            <td class="api-returns">Every surplus listing with quantity, unit, expiry and status</td>
+          </tr>
+          <tr>
+            <td><span class="endpoint"><span class="method">GET</span>/api/requests</span></td>
+            <td class="api-returns">Open and fulfilled requests with urgency</td>
+          </tr>
+          <tr>
+            <td><span class="endpoint"><span class="method">GET</span>/api/matches</span></td>
+            <td class="api-returns">Proposed, accepted and completed matches with scores</td>
+          </tr>
+          <tr>
+            <td><span class="endpoint"><span class="method">GET</span>/api/requests/&lt;id&gt;/candidates</span></td>
+            <td class="api-returns">The five best-scoring donations for one request</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<section class="section section-flush">
+  <div class="panel panel-flat">
+    <div class="panel-head">
+      <h2>Matching endpoints</h2>
+      <span class="count">signed in</span>
+    </div>
+    <div class="table-scroll">
+      <table class="data">
+        <thead>
+          <tr>
+            <th scope="col">Endpoint</th>
+            <th scope="col">Does</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><span class="endpoint"><span class="method method-post">POST</span>/api/run-matching</span></td>
+            <td class="api-returns">Runs a matching pass over the signed-in facility's own stock. Needs the session cookie and an <span class="endpoint">X-CSRF-Token</span> header.</td>
+          </tr>
+          <tr>
+            <td><span class="endpoint"><span class="method">GET</span>/api/cron/maintenance</span></td>
+            <td class="api-returns">Flags expired stock and runs the network-wide pass. Called by Vercel Cron with a bearer secret, not by browsers.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="panel-note">Writes are refused without a facility session, so these two return 401 or 403 to anything else. Browser forms carry a CSRF token; the cron route carries <span class="endpoint">Authorization: Bearer &lt;CRON_SECRET&gt;</span>.</p>
+  </div>
+</section>
+{% endblock %}

@@ -108,6 +108,23 @@ def create_app(config_class=Config):
             "year": datetime.now(timezone.utc).year,
         }
 
+    @app.context_processor
+    def inject_asset_version():
+        """Cache-bust style.css and app.js.
+
+        Both files keep a stable name, so a browser that cached them during an
+        earlier deployment keeps showing that stylesheet until it expires —
+        which looks like the site forgetting a redesign. Deriving the query
+        string from the files' own mtime changes the URL whenever they change.
+        """
+        stamp = 0
+        for name in ("css/style.css", "js/app.js"):
+            try:
+                stamp = max(stamp, int(os.path.getmtime(os.path.join(STATIC_DIR, name))))
+            except OSError:
+                continue
+        return {"asset_version": stamp}
+
     with app.app_context():
         try:
             # Imported here so the model is registered before create_all().

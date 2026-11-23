@@ -29,8 +29,8 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
-  <script src="{{ url_for('static', filename='js/app.js') }}" defer></script>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}?v={{ asset_version }}">
+  <script src="{{ url_for('static', filename='js/app.js') }}?v={{ asset_version }}" defer></script>
 
   <script type="application/ld+json">
   {
@@ -123,7 +123,7 @@
         {% endif %}
         <a href="{{ url_for('donations.donate') }}">Donate supplies</a>
         <a href="{{ url_for('requests.request_supply') }}">Request supplies</a>
-        <a href="{{ url_for('api.list_donations') }}">API</a>
+        <a href="{{ url_for('main.api_docs') }}">API</a>
       </nav>
     </div>
   </footer>

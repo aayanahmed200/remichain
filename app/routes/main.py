@@ -120,6 +120,17 @@ def run_matching():
     return redirect(url_for("main.dashboard"))
 
 
+@main_bp.route("/api")
+def api_docs():
+    """A page for the JSON API.
+
+    The footer used to link straight at /api/donations, which is raw JSON and
+    renders as a wall of pretty-printed text in the browser. This explains the
+    endpoints instead and lets people follow one when they want the data.
+    """
+    return render_template("api.html")
+
+
 @main_bp.route("/favicon.ico")
 def favicon():
     return send_from_directory(PUBLIC_DIR, "favicon.ico", mimetype="image/vnd.microsoft.icon")

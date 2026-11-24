@@ -1,50 +1,64 @@
 # RemiChain
 
-**Live application:** [remichain.vercel.app](https://remichain.vercel.app)
+> A Flask application that helps healthcare facilities match surplus medical supplies with facility requests before stock expires.
 
-[![Python](https://img.shields.io/badge/python-3776AB?style=for-the-badge&logo=python&logoColor=white)](https://www.python.org/) [![Flask](https://img.shields.io/badge/flask-000000?style=for-the-badge&logo=flask&logoColor=white)](https://flask.palletsprojects.com/) [![PostgreSQL](https://img.shields.io/badge/postgresql-4169E1?style=for-the-badge&logo=postgresql&logoColor=white)](https://www.postgresql.org/) [![Vercel](https://img.shields.io/badge/vercel-000000?style=for-the-badge&logo=vercel&logoColor=white)](https://vercel.com/)
+**Live application:** [remichain.vercel.app](https://remichain.vercel.app/)
 
-RemiChain matches surplus medical supplies with facility requests before the supplies expire in storage.
+[![Python](https://img.shields.io/badge/python-3776AB?style=for-the-badge&logo=python&logoColor=white)](https://www.python.org/) [![Flask](https://img.shields.io/badge/flask-000000?style=for-the-badge&logo=flask&logoColor=white)](https://flask.palletsprojects.com/) [![SQLAlchemy](https://img.shields.io/badge/sqlalchemy-D71F00?style=for-the-badge&logo=sqlalchemy&logoColor=white)](https://www.sqlalchemy.org/) [![PostgreSQL](https://img.shields.io/badge/postgresql-4169E1?style=for-the-badge&logo=postgresql&logoColor=white)](https://www.postgresql.org/) [![Vercel](https://img.shields.io/badge/vercel-000000?style=for-the-badge&logo=vercel&logoColor=white)](https://vercel.com/)
 
 ## Overview
 
-A facility signs in, lists what it has spare and what it needs. The matching service scores donation-request pairs on urgency, distance, quantity fit and how soon the stock expires, then proposes the best pairs for either side to accept, decline or complete. Each facility sees only its own stock, requests and matches; the landing page shows the network totals.
+Facilities can register, list surplus donations, and post supply requests. RemiChain ranks potential donation-request pairs using urgency, expiry timing, proximity, and quantity fit. Facilities can review proposed matches and accept, decline, or complete them; declining a match releases reserved stock, while partial fulfilment leaves the remainder available.
 
-A scheduled sweep runs once a day: it flags stock that has passed its expiry date and runs a matching pass, so new requests meet existing surplus without anyone pressing a button.
+The deployed application uses a Flask serverless function on Vercel with PostgreSQL storage. Local development can use SQLite.
 
-## How it was made
+## Key features
 
-A Flask application with SQLAlchemy models for facilities, donations, requests, matches and rate limits, rendered through Jinja templates and hand-written CSS. Sign-in is a session cookie scoped to one facility, and the write paths are guarded with CSRF tokens, per-facility rate limits and length caps on free-text fields.
+- Facility registration and facility-scoped dashboards.
+- Donation listings and supply requests.
+- Weighted matching based on urgency, expiry, proximity, and quantity.
+- Normalised item names so common naming variations can match.
+- Match acceptance, decline, completion, and partial fulfilment.
+- A daily maintenance endpoint that flags expired stock and runs a matching pass.
+- JSON API routes for application data.
 
-Matching lives in `app/services/matching.py`. It normalises free-text item names against a small catalogue, so "surgical gloves" and "gloves, surgical" resolve to the same item, then ranks candidate pairs on four weighted factors and records the score on each proposed match. Declining a match releases the reserved stock and reopens the request; partial fulfilment keeps the remainder available.
+## Implementation
 
-Vercel runs the app as a Python function loaded through `server.py`, with `public/` served from the CDN. The function filesystem is read-only apart from a per-instance `/tmp`, so the deployed app runs on hosted Postgres in its own `remichain` schema and connecting role, while locally it falls back to a SQLite file. The daily sweep is a Vercel cron job calling `/api/cron/maintenance`, which requires a bearer token matching `CRON_SECRET`.
+The application uses Flask, Flask-SQLAlchemy, and Jinja templates. The matching service is in `app/services/matching.py`; facility, donation, request, and match records are represented by SQLAlchemy models. Session cookies identify the signed-in facility, and write routes use CSRF protection, per-facility rate limits, and input length limits.
 
-## Highlights
+On Vercel, persistent data is stored in PostgreSQL. The daily maintenance task is configured through `vercel.json` and calls the cron endpoint using `CRON_SECRET`. A local SQLite database is used outside Vercel when no PostgreSQL connection is configured.
 
-- Register a hospital, clinic, pharmacy or NGO with coordinates, then sign in under that facility.
-- List surplus donations and post supply requests; both are scoped to the signed-in facility.
-- Rank donation-request pairs using four weighted factors, with a score shown on each proposed match.
-- Accept, decline or complete a match. Declining releases the reserved stock and reopens the request; partial fulfilment keeps the remainder available.
-- Match against a normalised item catalogue, so "surgical gloves" and "gloves, surgical" resolve to the same item.
-- Expired stock is flagged by the daily sweep and listed on the donor's dashboard instead of silently disappearing.
-- Browse a dashboard and read donations, requests and matches through a documented JSON API at `/api`.
-- Guard the write paths with CSRF tokens, per-facility rate limits and length caps on free-text fields.
+## Repository structure
 
-## Repository contents
+- `server.py` — WSGI entry point used by Vercel and Flask's local development server.
+- `app/` — application factory, authentication, models, routes, security helpers, and matching service.
+- `config.py` — database selection, session settings, and matching weights.
+- `templates/` — Jinja page templates.
+- `public/` — static assets.
+- `tests/` — automated tests.
+- `requirements.txt` and `vercel.json` — Python dependencies and deployment/cron configuration.
 
-- `server.py` — the WSGI entrypoint Vercel's Flask preset loads.
-- `app/` — application factory, auth, CSRF and rate-limit helpers, models, routes and the matching service.
-- `app/services/matching.py` — scoring, candidate selection and match creation.
-- `app/models/catalog.py` — the normalised item catalogue used for matching.
-- `templates/` and `public/` — Jinja templates, static assets, icons, manifest, robots and sitemap.
-- `tests/` — pytest checks for the matching rules.
-- `vercel.json` — the function bundle, included files and the daily cron schedule.
+## Run locally
 
-## Notes and limitations
+```bash
+python -m venv .venv
 
-Facilities self-register and are marked unverified; there is no email ownership check yet. Anyone who can sign in as a facility can act on that facility's matches, so per-person roles within an organisation are still missing. Matching is a scoring heuristic, not a validated allocation model, and the distance factor uses straight-line distance rather than a route. Without a database the app falls back to a throwaway SQLite file inside the function instance, which is fine locally and not something to rely on in production. Put email verification and per-user roles in front of it before using it with real stock across organisations.
+# macOS / Linux
+source .venv/bin/activate
+
+# Windows PowerShell
+.venv\Scripts\Activate.ps1
+
+python -m pip install -r requirements.txt
+flask --app server run
+```
+
+The local app uses SQLite by default. To test a PostgreSQL-backed setup, provide a PostgreSQL connection string through one of the database environment variables in `config.py`.
+
+## Status and limitations
+
+Facilities self-register and are marked unverified; the current app does not yet verify email ownership or provide individual user roles within an organisation. Matching is a weighted heuristic, not a clinically validated or optimised allocation system, and proximity is based on straight-line distance rather than road routes. SQLite is suitable for local development, not persistent storage on Vercel; configure hosted PostgreSQL for a production deployment with durable data.
 
 ## License
 
-MIT — see `LICENSE`.
+MIT. See [LICENSE](LICENSE).

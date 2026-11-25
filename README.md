@@ -38,26 +38,9 @@ On Vercel, persistent data is stored in PostgreSQL. The daily maintenance task i
 - `tests/` — automated tests.
 - `requirements.txt` and `vercel.json` — Python dependencies and deployment/cron configuration.
 
-## Run locally
-
-```bash
-python -m venv .venv
-
-# macOS / Linux
-source .venv/bin/activate
-
-# Windows PowerShell
-.venv\Scripts\Activate.ps1
-
-python -m pip install -r requirements.txt
-flask --app server run
-```
-
-The local app uses SQLite by default. To test a PostgreSQL-backed setup, provide a PostgreSQL connection string through one of the database environment variables in `config.py`.
-
 ## Status and limitations
 
-Facilities self-register and are marked unverified; the current app does not yet verify email ownership or provide individual user roles within an organisation. Matching is a weighted heuristic, not a clinically validated or optimised allocation system, and proximity is based on straight-line distance rather than road routes. SQLite is suitable for local development, not persistent storage on Vercel; configure hosted PostgreSQL for a production deployment with durable data.
+Facilities self-register and are marked unverified; the current app does not yet verify email ownership or provide individual user roles within an organisation. Matching is a weighted heuristic, not a clinically validated or optimised allocation system, and proximity is based on straight-line distance rather than road routes. The database connection is read from the environment variables in `config.py`, falling back to SQLite, which suits local development but not persistent storage on Vercel; a production deployment needs a hosted PostgreSQL string to keep data durable.
 
 ## License
 

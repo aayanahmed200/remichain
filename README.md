@@ -12,7 +12,7 @@ Facilities can register, list surplus donations, and post supply requests. RemiC
 
 The deployed application uses a Flask serverless function on Vercel with PostgreSQL storage. Local development can use SQLite.
 
-## Key features
+## Highlights
 
 - Facility registration and facility-scoped dashboards.
 - Donation listings and supply requests.
